@@ -33,13 +33,11 @@ public final class IdentityClient {
         sanitizeUserId(userId);
         final String identityUrl = properties.getIdentityUrlTemplate();
         final String url = identityUrl.contains("{userId}") ? identityUrl.replace("{userId}", userId) : identityUrl;
-        sanitizeUrl(url);
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
         headers.add("Accept", properties.getAcceptHeader());
         headers.add(properties.getUserIdHeader(), userId);
-
-        final RequestEntity<Void> request = RequestEntity.get(URI.create(url)).headers(headers).build();
+        final RequestEntity<Void> request = RequestEntity.get(sanitizeUrl(url)).headers(headers).build();
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
         final LoggedInUserPermissionsResponse body = response.getBody();
         if (body == null) {
@@ -51,9 +49,9 @@ public final class IdentityClient {
         return identityResponse;
     }
 
-    public void sanitizeUrl(String url) {
+    public URI sanitizeUrl(String url) {
         try {
-            new URL(url).toURI();
+            return new URL(url).toURI();
         } catch (URISyntaxException | MalformedURLException e) {
             log.error("Invalid url provided in properties");
             throw new RuntimeException("Invalid url");
