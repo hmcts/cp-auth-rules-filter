@@ -9,7 +9,10 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Duration;
 
 @Slf4j
@@ -30,10 +33,12 @@ public final class IdentityClient {
         sanitizeUserId(userId);
         final String identityUrl = properties.getIdentityUrlTemplate();
         final String url = identityUrl.contains("{userId}") ? identityUrl.replace("{userId}", userId) : identityUrl;
+        sanitizeUrl(url);
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
         headers.add("Accept", properties.getAcceptHeader());
         headers.add(properties.getUserIdHeader(), userId);
+
         final RequestEntity<Void> request = RequestEntity.get(URI.create(url)).headers(headers).build();
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
         final LoggedInUserPermissionsResponse body = response.getBody();
@@ -44,6 +49,15 @@ public final class IdentityClient {
             identityResponse = new IdentityResponse(userId, body.groups(), body.permissions());
         }
         return identityResponse;
+    }
+
+    public void sanitizeUrl(String url) {
+        try {
+            new URL(url).toURI();
+        } catch (URISyntaxException | MalformedURLException e) {
+            log.error("Invalid url:{}", url);
+            throw new RuntimeException("Invalid url");
+        }
     }
 
     public void sanitizeUserId(String userId) {
