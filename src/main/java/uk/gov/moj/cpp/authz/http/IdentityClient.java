@@ -43,7 +43,7 @@ public final class IdentityClient {
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
         final LoggedInUserPermissionsResponse body = response.getBody();
         if (body == null) {
-            log.warn("Empty identity response for userId={}", userId);
+            log.warn("Empty identity response for userId:{}", sanitizeForLog(userId));
             identityResponse = new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
         } else {
             identityResponse = new IdentityResponse(userId, body.groups(), body.permissions());
@@ -55,7 +55,7 @@ public final class IdentityClient {
         try {
             new URL(url).toURI();
         } catch (URISyntaxException | MalformedURLException e) {
-            log.error("Invalid url:{}", url);
+            log.error("Invalid url provided in properties");
             throw new RuntimeException("Invalid url");
         }
     }
@@ -66,5 +66,14 @@ public final class IdentityClient {
         }
         log.error("Illegal userId \"{}\" must match regex:{}", userId, USERID_REGEX);
         throw new RuntimeException("Illegal userId");
+    }
+
+    public String sanitizeForLog(String input) {
+        if (input == null) {
+            return input;
+        }
+        return input
+                .replaceAll("[^a-zA-Z0-9\\\\-]", "?")
+                .replaceAll("[\\r\\n]", "?");
     }
 }

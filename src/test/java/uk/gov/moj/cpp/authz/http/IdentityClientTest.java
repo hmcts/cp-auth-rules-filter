@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,5 +50,12 @@ class IdentityClientTest {
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl(""));
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl("this--bad-url"));
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl("http://localhost-%%$^&& iuyi"));
+    }
+
+    @Test
+    void sanitize_for_log_should_clean_up(){
+        assertThat(identityClient.sanitizeForLog("any")).isEqualTo("any");
+        assertThat(identityClient.sanitizeForLog("OK")).isEqualTo("OK");
+        assertThat(identityClient.sanitizeForLog("bad%or!")).isEqualTo("bad?or?");
     }
 }
