@@ -41,6 +41,8 @@ class IdentityClientTest {
         identityClient.sanitizeUrl("http://localhost:8080");
         identityClient.sanitizeUrl("http://localhost:8080/anything");
         identityClient.sanitizeUrl("http://localhost:8080/anything?param=xyz");
+        String defaultIdentityUrl =  "http://localhost:8080/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions";
+        identityClient.sanitizeUrl(defaultIdentityUrl);
         // no exception
     }
 
@@ -48,6 +50,7 @@ class IdentityClientTest {
     void properties_url_should_error_when_bad_url() {
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl(null));
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl(""));
+        assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl(","));
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl("this--bad-url"));
         assertThrows(RuntimeException.class, () -> identityClient.sanitizeUrl("http://localhost-%%$^&& iuyi"));
     }

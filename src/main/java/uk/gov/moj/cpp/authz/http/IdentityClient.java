@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
@@ -18,6 +19,8 @@ import java.time.Duration;
 @Slf4j
 public final class IdentityClient {
     private final static String USERID_REGEX = "^[\\-a-zA-Z0-9]*$";
+    // This regex is possibly too tight for urls but given that we put header user-id into the url it needs to be
+    private final static String URL_REGEX = "[^a-zA-Z0-9+.-]";
     private final HttpAuthzProperties properties;
     private final RestTemplate restTemplate;
 
@@ -50,16 +53,20 @@ public final class IdentityClient {
     }
 
     public URI sanitizeUrl(String url) {
+        if (url.matches(URL_REGEX)) {
+            log.error("Invalid url does not match url regex:\"{}\"", URL_REGEX);
+            throw new RuntimeException("Invalid url does not match url regex");
+        }
         try {
             return new URL(url).toURI();
         } catch (URISyntaxException | MalformedURLException e) {
-            log.error("Invalid url provided in properties");
+            log.error("Invalid url. {}", e.getMessage());
             throw new RuntimeException("Invalid url");
         }
     }
 
     public void sanitizeUserId(String userId) {
-        if (userId == null || userId.matches(USERID_REGEX)) {
+        if (!StringUtils.hasLength(userId) || userId.matches(USERID_REGEX)) {
             return;
         }
         log.error("Illegal userId \"{}\" must match regex:{}", userId, USERID_REGEX);
