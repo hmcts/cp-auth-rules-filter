@@ -18,9 +18,8 @@ import java.time.Duration;
 
 @Slf4j
 public final class IdentityClient {
-    private final static String USERID_REGEX = "^[\\-a-zA-Z0-9]*$";
-    // This regex is possibly too tight for urls but given that we put header user-id into the url it needs to be
-    private final static String URL_REGEX = "[^a-zA-Z0-9+.-]";
+    private static final String USERID_REGEX = "^[\\-a-zA-Z0-9]*$";
+    private static final String URL_TIGHT_REGEX = "[^a-zA-Z0-9+.-]";
     private final HttpAuthzProperties properties;
     private final RestTemplate restTemplate;
 
@@ -52,9 +51,9 @@ public final class IdentityClient {
         return identityResponse;
     }
 
-    public URI sanitizeUrl(String url) {
-        if (url.matches(URL_REGEX)) {
-            log.error("Invalid url does not match url regex:\"{}\"", URL_REGEX);
+    public URI sanitizeUrl(final String url) {
+        if (url.matches(URL_TIGHT_REGEX)) {
+            log.error("Invalid url does not match url regex:\"{}\"", URL_TIGHT_REGEX);
             throw new RuntimeException("Invalid url does not match url regex");
         }
         try {
@@ -65,7 +64,7 @@ public final class IdentityClient {
         }
     }
 
-    public void sanitizeUserId(String userId) {
+    public void sanitizeUserId(final String userId) {
         if (!StringUtils.hasLength(userId) || userId.matches(USERID_REGEX)) {
             return;
         }
@@ -73,7 +72,7 @@ public final class IdentityClient {
         throw new RuntimeException("Illegal userId");
     }
 
-    public String sanitizeForLog(String input) {
+    public String sanitizeForLog(final String input) {
         if (input == null) {
             return input;
         }
