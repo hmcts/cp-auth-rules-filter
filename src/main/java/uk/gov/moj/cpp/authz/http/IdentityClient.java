@@ -68,7 +68,7 @@ public final class IdentityClient {
         if (!StringUtils.hasLength(userId) || userId.matches(USERID_REGEX)) {
             return;
         }
-        log.error("Illegal userId \"{}\" must match regex:{}", userId, USERID_REGEX);
+        log.error("Illegal userId \"{}\" must match regex:{}", sanitizeForLog(userId), USERID_REGEX);
         throw new RuntimeException("Illegal userId");
     }
 
