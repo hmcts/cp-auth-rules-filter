@@ -59,6 +59,6 @@ class IdentityClientTest {
     void sanitize_for_log_should_clean_up(){
         assertThat(identityClient.sanitizeForLog("any")).isEqualTo("any");
         assertThat(identityClient.sanitizeForLog("OK")).isEqualTo("OK");
-        assertThat(identityClient.sanitizeForLog("bad%or!")).isEqualTo("bad?or?");
+        assertThat(identityClient.sanitizeForLog("-bad%or!")).isEqualTo("-bad?or?");
     }
 }

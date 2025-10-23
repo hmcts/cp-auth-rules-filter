@@ -76,8 +76,6 @@ public final class IdentityClient {
         if (input == null) {
             return input;
         }
-        return input
-                .replaceAll("[^a-zA-Z0-9\\\\-]", "?")
-                .replaceAll("[\\r\\n]", "?");
+        return input.replaceAll("[^a-zA-Z0-9\\-]", "?");
     }
 }
