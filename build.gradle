@@ -2,7 +2,7 @@ plugins {
   id 'java-library'
   id 'pmd'
   id 'maven-publish'
-  id 'org.cyclonedx.bom' version '2.4.1'
+  id 'org.cyclonedx.bom' version '3.0.1'
 }
 
 group = 'uk.gov.hmcts.cp'
@@ -56,7 +56,7 @@ tasks.withType(Test).configureEach {
 
 ext {
   springBootVersion = "4.0.0-M3"
-  lombokVersion = "1.18.38"
+  lombokVersion = "1.18.42"
   jupiterVersion = "6.0.0"
   droolsVersion = "10.1.0"
 }
@@ -79,5 +79,5 @@ dependencies {
   implementation "org.drools:drools-core:$droolsVersion"
   implementation "org.drools:drools-compiler:$droolsVersion"
   implementation "org.drools:drools-mvel:$droolsVersion"
-  implementation "org.mvel:mvel2:2.5.0.Final"
+  implementation "org.mvel:mvel2:2.5.2.Final"
 }
