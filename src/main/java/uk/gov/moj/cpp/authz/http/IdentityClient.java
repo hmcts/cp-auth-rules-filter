@@ -17,7 +17,6 @@ import java.time.Duration;
 
 @Slf4j
 public final class IdentityClient {
-    private static final String URL_TIGHT_REGEX = "[^a-zA-Z0-9+.-]";
     private final HttpAuthzProperties properties;
     private final RestTemplate restTemplate;
 
@@ -31,7 +30,7 @@ public final class IdentityClient {
 
     public IdentityResponse fetchIdentity(final String userId) {
         final String urlPath = properties.getIdentityUrlPath().replace("{userId}", userId);
-        final URI url = sanitizeUrl(properties.getIdentityUrlRoot() + urlPath);
+        final URI url = constructUrl(properties.getIdentityUrlRoot(), urlPath);
 
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
@@ -50,13 +49,10 @@ public final class IdentityClient {
         return identityResponse;
     }
 
-    public URI sanitizeUrl(final String url) {
-        if (url.matches(URL_TIGHT_REGEX)) {
-            log.error("Invalid url does not match url regex:\"{}\"", URL_TIGHT_REGEX);
-            throw new RuntimeException("Invalid url does not match url regex");
-        }
+    public URI constructUrl(final String urlRoot, final String urlPath) {
         try {
-            return new URL(url).toURI();
+            URL rootUrl = new URL(urlRoot);
+            return new URL(rootUrl, urlPath).toURI();
         } catch (URISyntaxException | MalformedURLException e) {
             log.error("Invalid url. {}", e.getMessage());
             throw new RuntimeException("Invalid url");
