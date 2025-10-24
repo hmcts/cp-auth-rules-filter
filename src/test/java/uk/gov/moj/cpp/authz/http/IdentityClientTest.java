@@ -59,7 +59,7 @@ class IdentityClientTest {
     void sanitize_for_log_should_remove_bad_chars(){
         assertThat(identityClient.sanitizeForLog("any")).isEqualTo("any");
         assertThat(identityClient.sanitizeForLog("OK")).isEqualTo("OK");
-        assertThat(identityClient.sanitizeForLog("-bad%or!")).isEqualTo("-bador");
-        assertThat(identityClient.sanitizeForLog("bad\nstuff")).isEqualTo("badstuff");
+        assertThat(identityClient.sanitizeForLog("-bad%or!")).isEqualTo("-bad.or.");
+        assertThat(identityClient.sanitizeForLog("bad\nstuff")).isEqualTo("bad.stuff");
     }
 }

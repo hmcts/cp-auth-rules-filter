@@ -76,6 +76,6 @@ public final class IdentityClient {
         if (!StringUtils.hasLength(message)) {
             return message;
         }
-        return message.replaceAll("[^a-zA-Z0-9\\-]", "");
+        return message.replaceAll("[^a-zA-Z0-9\\-]", ".");
     }
 }
