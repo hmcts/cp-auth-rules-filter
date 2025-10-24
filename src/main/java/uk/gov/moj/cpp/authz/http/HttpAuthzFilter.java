@@ -43,12 +43,9 @@ public final class HttpAuthzFilter implements Filter {
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
-        final Optional<String> excluded = properties.getExcludePathPrefixes()
-                .stream()
-                .filter(excludedPrefix -> pathWithinApplication.startsWith(excludedPrefix))
-                .findFirst();
-
-        if (excluded.isPresent()) {
+        boolean excluded = properties.getExcludePathPrefixes().stream()
+                .anyMatch(excludedPrefix -> pathWithinApplication.startsWith(excludedPrefix));
+        if (excluded) {
             invokeChain = true;
         } else {
             final Optional<String> userId = validateUserId(httpRequest.getHeader(properties.getUserIdHeader()));
@@ -91,7 +88,7 @@ public final class HttpAuthzFilter implements Filter {
         }
     }
 
-    public Optional<String> validateUserId(String userId) {
+    public Optional<String> validateUserId(final String userId) {
         if (StringUtils.hasLength(userId) && userId.length() == GUID_LENGTH && userId.matches(GUID_REGEX)) {
             return Optional.of(userId);
         }
