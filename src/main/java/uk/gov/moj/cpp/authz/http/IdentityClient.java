@@ -49,10 +49,16 @@ public final class IdentityClient {
         return identityResponse;
     }
 
-    public URI constructUrl(final String urlRoot, final String urlPath) {
+    public URI constructUrl(final String root, final String path) {
         try {
-            URL rootUrl = new URL(urlRoot);
-            return new URL(rootUrl, urlPath).toURI();
+            URL rootUrl = new URL(root);
+            URI uri = new URL(rootUrl, path).toURI();
+            if (uri.getHost().equalsIgnoreCase(rootUrl.getHost())) {
+                return uri;
+            } else {
+                log.error("Invalid url constructed host does not match root host:{}", rootUrl.getHost());
+                throw new RuntimeException("Invalid url host does not match urlRoot");
+            }
         } catch (URISyntaxException | MalformedURLException e) {
             log.error("Invalid url. {}", e.getMessage());
             throw new RuntimeException("Invalid url");

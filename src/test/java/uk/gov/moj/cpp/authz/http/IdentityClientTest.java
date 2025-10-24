@@ -15,8 +15,8 @@ class IdentityClientTest {
 
     @Test
     void properties_url_should_accept_valid_url() {
-        identityClient.constructUrl("http://localhost/", "path");
-        identityClient.constructUrl("http://localhost:8080/", "usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions");
+        identityClient.constructUrl("http://localhost", "/path");
+        identityClient.constructUrl("http://localhost:8080", "/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions");
         // no exception
     }
 
