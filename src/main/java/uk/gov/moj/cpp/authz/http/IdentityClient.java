@@ -5,7 +5,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
@@ -18,7 +17,6 @@ import java.time.Duration;
 
 @Slf4j
 public final class IdentityClient {
-    private static final String USERID_REGEX = "^[\\-a-zA-Z0-9]*$";
     private static final String URL_TIGHT_REGEX = "[^a-zA-Z0-9+.-]";
     private final HttpAuthzProperties properties;
     private final RestTemplate restTemplate;
@@ -32,7 +30,6 @@ public final class IdentityClient {
     }
 
     public IdentityResponse fetchIdentity(final String userId) {
-        sanitizeUserId(userId);
         final String identityUrl = properties.getIdentityUrlTemplate();
         final String url = identityUrl.contains("{userId}") ? identityUrl.replace("{userId}", userId) : identityUrl;
         final HttpHeaders headers = new HttpHeaders();
@@ -43,7 +40,7 @@ public final class IdentityClient {
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
         final LoggedInUserPermissionsResponse body = response.getBody();
         if (body == null) {
-            log.warn("Empty identity response for userId:{}", sanitizeForLog(userId));
+            log.error("Empty identity response");
             identityResponse = new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
         } else {
             identityResponse = new IdentityResponse(userId, body.groups(), body.permissions());
@@ -62,20 +59,5 @@ public final class IdentityClient {
             log.error("Invalid url. {}", e.getMessage());
             throw new RuntimeException("Invalid url");
         }
-    }
-
-    public void sanitizeUserId(final String userId) {
-        if (!StringUtils.hasLength(userId) || userId.matches(USERID_REGEX)) {
-            return;
-        }
-        log.error("Illegal userId \"{}\" must match regex:{}", sanitizeForLog(userId), USERID_REGEX);
-        throw new RuntimeException("Illegal userId");
-    }
-
-    public String sanitizeForLog(final String message) {
-        if (!StringUtils.hasLength(message)) {
-            return message;
-        }
-        return message.replaceAll("[^a-zA-Z0-9\\-]", ".");
     }
 }

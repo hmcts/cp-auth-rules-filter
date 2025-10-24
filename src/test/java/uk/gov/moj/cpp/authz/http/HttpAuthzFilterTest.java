@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -327,7 +328,8 @@ class HttpAuthzFilterTest {
         assertThat(httpAuthzFilter.validateUserId("")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("bad")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("0" + USER_ID)).isEmpty();
-        assertThat(httpAuthzFilter.validateUserId(USER_ID.toUpperCase()).get()).isEqualTo(USER_ID.toUpperCase());
+        String userIdUpperCase = USER_ID.toUpperCase(Locale.getDefault());
+        assertThat(httpAuthzFilter.validateUserId(userIdUpperCase).get()).isEqualTo(userIdUpperCase);
         assertThat(httpAuthzFilter.validateUserId(USER_ID).get()).isEqualTo(USER_ID);
         assertThat(httpAuthzFilter.validateUserId(USER_ID).get()).isEqualTo(USER_ID);
     }
