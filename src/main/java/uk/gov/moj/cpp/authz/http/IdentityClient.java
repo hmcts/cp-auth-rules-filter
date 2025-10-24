@@ -30,13 +30,15 @@ public final class IdentityClient {
     }
 
     public IdentityResponse fetchIdentity(final String userId) {
-        final String identityUrl = properties.getIdentityUrlTemplate();
-        final String url = identityUrl.contains("{userId}") ? identityUrl.replace("{userId}", userId) : identityUrl;
+        final String urlPath = properties.getIdentityUrlPath().replace("{userId}", userId);
+        final URI url = sanitizeUrl(properties.getIdentityUrlRoot() + urlPath);
+
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
         headers.add("Accept", properties.getAcceptHeader());
         headers.add(properties.getUserIdHeader(), userId);
-        final RequestEntity<Void> request = RequestEntity.get(sanitizeUrl(url)).headers(headers).build();
+
+        final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
         final LoggedInUserPermissionsResponse body = response.getBody();
         if (body == null) {

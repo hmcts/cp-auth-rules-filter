@@ -43,16 +43,12 @@ public final class HttpAuthzFilter implements Filter {
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
+        final Optional<String> excluded = properties.getExcludePathPrefixes()
+                .stream()
+                .filter(excludedPrefix -> pathWithinApplication.startsWith(excludedPrefix))
+                .findFirst();
 
-        boolean isExcluded = false;
-        for (final String prefix : properties.getExcludePathPrefixes()) {
-            if (pathWithinApplication.startsWith(prefix)) {
-                isExcluded = true;
-                break;
-            }
-        }
-
-        if (isExcluded) {
+        if (excluded.isPresent()) {
             invokeChain = true;
         } else {
             final Optional<String> userId = validateUserId(httpRequest.getHeader(properties.getUserIdHeader()));
@@ -85,12 +81,8 @@ public final class HttpAuthzFilter implements Filter {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                     }
                 }
-
             } else {
-
-                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                        "Missing header: " + properties.getUserIdHeader());
-
+                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing header: " + properties.getUserIdHeader());
             }
         }
 
