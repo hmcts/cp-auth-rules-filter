@@ -15,9 +15,8 @@ import java.util.Map;
 @Getter
 public class HttpAuthzProperties {
     private boolean enabled;
-    private String identityUrlRoot = "http://localhost:${server.port}/";
+    private String identityUrlRoot = "http://localhost:8080/";
     private String identityUrlPath = "usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions";
-    // private String identityUrlTemplate = "http://localhost:8080/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions?";
     private String userIdHeader = "CJSCPPUID";
     private String actionHeader = "CPP-ACTION";
     private String acceptHeader = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
