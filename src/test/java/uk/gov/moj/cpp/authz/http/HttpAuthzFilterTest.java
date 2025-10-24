@@ -18,10 +18,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HttpAuthzFilterTest {
@@ -34,8 +38,7 @@ class HttpAuthzFilterTest {
     private static final String PATH_ECHO = "/api/echo";
     private static final String PATH_EXCLUDED = "/usersgroups-query-api/query/api/rest/ping";
     private static final String PATH_EXCLUDED_METRICS = "/metrics/prometheus";
-    private static final String USER_123 = "user-123";
-    private static final String USER_ABC = "user-abc";
+    private static final String USER_ID = "a05078bd-b189-4fd9-8c6e-181e9a743835";
     private static final String ACTION_GET_HELLO = "GET /api/hello";
     private static final String ACTION_POST_ECHO = "POST /api/echo";
     private static final String GROUP_LEGAL_ADVISERS = "Legal Advisers";
@@ -97,7 +100,7 @@ class HttpAuthzFilterTest {
         httpAuthzProperties.setActionRequired(true);
 
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
         httpAuthzFilter.doFilter(req, res, filterChain);
@@ -108,11 +111,11 @@ class HttpAuthzFilterTest {
     @Test
     void allowsRequestWhenEngineApproves() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         when(droolsAuthzEngine.evaluate(any(), any())).thenReturn(true);
 
@@ -124,11 +127,11 @@ class HttpAuthzFilterTest {
     @Test
     void principalAttributeIsSetWhenEngineApproves() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         when(droolsAuthzEngine.evaluate(any(), any())).thenReturn(true);
 
@@ -141,11 +144,11 @@ class HttpAuthzFilterTest {
     @Test
     void deniesRequestWhenEngineRejects() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of("Guests"));
         when(droolsAuthzEngine.evaluate(any(), any())).thenReturn(false);
 
@@ -157,12 +160,12 @@ class HttpAuthzFilterTest {
     @Test
     void usesHeaderActionName() throws IOException, ServletException {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         req.addHeader(ACTION_HEADER, ACTION_GET_HELLO);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
@@ -175,12 +178,12 @@ class HttpAuthzFilterTest {
     @Test
     void usesHeaderMethodAttribute() throws IOException, ServletException {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         req.addHeader(ACTION_HEADER, ACTION_GET_HELLO);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
@@ -193,12 +196,12 @@ class HttpAuthzFilterTest {
     @Test
     void usesHeaderPathAttribute() throws IOException, ServletException {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         req.addHeader(ACTION_HEADER, ACTION_GET_HELLO);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
@@ -213,11 +216,11 @@ class HttpAuthzFilterTest {
         httpAuthzProperties.setActionRequired(false);
 
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ECHO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
@@ -232,11 +235,11 @@ class HttpAuthzFilterTest {
         httpAuthzProperties.setActionRequired(false);
 
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ECHO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
@@ -251,11 +254,11 @@ class HttpAuthzFilterTest {
         httpAuthzProperties.setActionRequired(false);
 
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ECHO);
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
@@ -280,13 +283,13 @@ class HttpAuthzFilterTest {
     @Test
     void resolvesActionFromContentTypeVendorWinsOverHeader() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, "/sjp/anything");
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         req.addHeader("Content-Type", "application/vnd.sjp.delete-financial-means+json");
         req.addHeader(ACTION_HEADER, "POST /sjp/anything"); // should be ignored in favor of vendor
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
 
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
@@ -301,12 +304,12 @@ class HttpAuthzFilterTest {
     @Test
     void resolvesActionFromAcceptWhenNoContentType() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, "/hearing/draft-result");
-        req.addHeader(USER_ID_HEADER, USER_123);
+        req.addHeader(USER_ID_HEADER, USER_ID);
         req.addHeader("Accept", "application/json, application/vnd.hearing.get-draft-result+json;q=0.9");
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
-        final IdentityResponse identityResponse = mockIdentity(USER_123);
-        when(identityClient.fetchIdentity(USER_123)).thenReturn(identityResponse);
+        final IdentityResponse identityResponse = mockIdentity(USER_ID);
+        when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
 
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
@@ -316,6 +319,17 @@ class HttpAuthzFilterTest {
 
         assertEquals("hearing.get-draft-result", captor.getValue().name(),
                 "Vendor token from Accept must be used when Content-Type is absent");
+    }
+
+    @Test
+    void validate_userid_should_return_correctly() {
+        assertThat(httpAuthzFilter.validateUserId(null)).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId("")).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId("bad")).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId("0" + USER_ID)).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId(USER_ID.toUpperCase()).get()).isEqualTo(USER_ID.toUpperCase());
+        assertThat(httpAuthzFilter.validateUserId(USER_ID).get()).isEqualTo(USER_ID);
+        assertThat(httpAuthzFilter.validateUserId(USER_ID).get()).isEqualTo(USER_ID);
     }
 
     private static IdentityResponse mockIdentity(final String userId) {
