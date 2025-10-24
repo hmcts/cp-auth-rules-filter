@@ -72,10 +72,10 @@ public final class IdentityClient {
         throw new RuntimeException("Illegal userId");
     }
 
-    public String sanitizeForLog(final String input) {
-        if (input == null) {
-            return input;
+    public String sanitizeForLog(final String message) {
+        if (!StringUtils.hasLength(message)) {
+            return message;
         }
-        return input.replaceAll("[^a-zA-Z0-9\\-]", "?");
+        return message.replaceAll("[^a-zA-Z0-9\\-]", "");
     }
 }
