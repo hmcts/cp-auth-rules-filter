@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.UUID;
 
 @Slf4j
 public final class IdentityClient {
@@ -28,14 +29,14 @@ public final class IdentityClient {
         this.restTemplate = new RestTemplate(factory);
     }
 
-    public IdentityResponse fetchIdentity(final String userId) {
-        final String urlPath = properties.getIdentityUrlPath().replace("{userId}", userId);
+    public IdentityResponse fetchIdentity(final UUID userId) {
+        final String urlPath = properties.getIdentityUrlPath().replace("{userId}", userId.toString());
         final URI url = constructUrl(properties.getIdentityUrlRoot(), urlPath);
 
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
         headers.add("Accept", properties.getAcceptHeader());
-        headers.add(properties.getUserIdHeader(), userId);
+        headers.add(properties.getUserIdHeader(), userId.toString());
 
         final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);

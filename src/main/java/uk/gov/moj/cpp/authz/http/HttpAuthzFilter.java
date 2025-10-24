@@ -21,10 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @AllArgsConstructor
 public final class HttpAuthzFilter implements Filter {
-    private static final String GUID_REGEX = "^[0-9a-zA-Z\\-]*$";
+    private static final String GUID_REGEX = "^[0-9a-fA-F\\-]*$";
     private static final int GUID_LENGTH = 36;
 
     private final HttpAuthzProperties properties;
@@ -48,7 +49,7 @@ public final class HttpAuthzFilter implements Filter {
         if (excluded) {
             invokeChain = true;
         } else {
-            final Optional<String> userId = validateUserId(httpRequest.getHeader(properties.getUserIdHeader()));
+            final Optional<UUID> userId = validateUserId(httpRequest.getHeader(properties.getUserIdHeader()));
             if (userId.isPresent()) {
                 final ResolvedAction resolved =
                         RequestActionResolver.resolve(httpRequest, properties.getActionHeader(), pathWithinApplication);
@@ -88,9 +89,9 @@ public final class HttpAuthzFilter implements Filter {
         }
     }
 
-    public Optional<String> validateUserId(final String userId) {
+    public Optional<UUID> validateUserId(final String userId) {
         if (StringUtils.hasLength(userId) && userId.length() == GUID_LENGTH && userId.matches(GUID_REGEX)) {
-            return Optional.of(userId);
+            return Optional.of(UUID.fromString(userId));
         }
         return Optional.empty();
     }

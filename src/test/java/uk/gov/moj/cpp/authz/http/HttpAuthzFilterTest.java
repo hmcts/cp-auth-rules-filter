@@ -16,8 +16,8 @@ import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +39,8 @@ class HttpAuthzFilterTest {
     private static final String PATH_ECHO = "/api/echo";
     private static final String PATH_EXCLUDED = "/usersgroups-query-api/query/api/rest/ping";
     private static final String PATH_EXCLUDED_METRICS = "/metrics/prometheus";
-    private static final String USER_ID = "a05078bd-b189-4fd9-8c6e-181e9a743835";
+    private static final UUID USER_ID = UUID.fromString("a05078bd-b189-4fd9-8c6e-181e9a743835");
+    private static final UUID USER_ID_UC = UUID.fromString("E3F58BF7-FB59-4E5C-8ED9-E6A0F5966743");
     private static final String ACTION_GET_HELLO = "GET /api/hello";
     private static final String ACTION_POST_ECHO = "POST /api/echo";
     private static final String GROUP_LEGAL_ADVISERS = "Legal Advisers";
@@ -328,13 +329,11 @@ class HttpAuthzFilterTest {
         assertThat(httpAuthzFilter.validateUserId("")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("bad")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("0" + USER_ID)).isEmpty();
-        String userIdUpperCase = USER_ID.toUpperCase(Locale.getDefault());
-        assertThat(httpAuthzFilter.validateUserId(userIdUpperCase).get()).isEqualTo(userIdUpperCase);
-        assertThat(httpAuthzFilter.validateUserId(USER_ID).get()).isEqualTo(USER_ID);
-        assertThat(httpAuthzFilter.validateUserId(USER_ID).get()).isEqualTo(USER_ID);
+        assertThat(httpAuthzFilter.validateUserId(USER_ID.toString()).get()).isEqualTo(USER_ID);
+        assertThat(httpAuthzFilter.validateUserId(USER_ID_UC.toString()).get()).isEqualTo(USER_ID_UC);
     }
 
-    private static IdentityResponse mockIdentity(final String userId) {
+    private static IdentityResponse mockIdentity(final UUID userId) {
         final IdentityResponse identity = mock(IdentityResponse.class);
         when(identity.userId()).thenReturn(userId);
         return identity;
