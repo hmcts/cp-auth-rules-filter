@@ -52,8 +52,8 @@ public final class IdentityClient {
 
     public URI constructUrl(final String root, final String path) {
         try {
-            URL rootUrl = new URL(root);
-            URI uri = new URL(rootUrl, path).toURI();
+            final URL rootUrl = new URL(root);
+            final URI uri = new URL(rootUrl, path).toURI();
             if (uri.getHost().equalsIgnoreCase(rootUrl.getHost())) {
                 return uri;
             } else {

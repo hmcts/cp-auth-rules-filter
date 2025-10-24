@@ -44,8 +44,7 @@ public final class HttpAuthzFilter implements Filter {
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
-        boolean excluded = properties.getExcludePathPrefixes().stream()
-                .anyMatch(excludedPrefix -> pathWithinApplication.startsWith(excludedPrefix));
+        final boolean excluded = properties.getExcludePathPrefixes().stream().anyMatch(pathWithinApplication::startsWith);
         if (excluded) {
             invokeChain = true;
         } else {

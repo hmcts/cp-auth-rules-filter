@@ -324,13 +324,19 @@ class HttpAuthzFilterTest {
     }
 
     @Test
-    void validate_userid_should_return_correctly() {
+    void validate_userid_should_reject_none_guid() {
         assertThat(httpAuthzFilter.validateUserId(null)).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("bad")).isEmpty();
-        assertThat(httpAuthzFilter.validateUserId("0" + USER_ID)).isEmpty();
-        assertThat(httpAuthzFilter.validateUserId(USER_ID.toString()).get()).isEqualTo(USER_ID);
-        assertThat(httpAuthzFilter.validateUserId(USER_ID_UC.toString()).get()).isEqualTo(USER_ID_UC);
+        assertThat(httpAuthzFilter.validateUserId("a05078bd")).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a74383")).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId(USER_ID + "0")).isEmpty();
+    }
+
+    @Test
+    void validate_userid_should_return_good_guid() {
+        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a743835").get()).isEqualTo(USER_ID);
+        assertThat(httpAuthzFilter.validateUserId("E3F58BF7-FB59-4E5C-8ED9-E6A0F5966743").get()).isEqualTo(USER_ID_UC);
     }
 
     private static IdentityResponse mockIdentity(final UUID userId) {

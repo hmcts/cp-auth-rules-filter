@@ -34,7 +34,7 @@ public class AuthzAutoConfiguration {
 
     @PostConstruct
     private void onStart() {
-        String propertiesJson = new ObjectMapper().writeValueAsString(properties);
+        final String propertiesJson = new ObjectMapper().writeValueAsString(properties);
         log.info("CPP HTTP Authz starter ACTIVE -> {}", propertiesJson);
     }
 
