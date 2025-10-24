@@ -39,7 +39,7 @@ class HttpAuthzFilterTest {
     private static final String PATH_ECHO = "/api/echo";
     private static final String PATH_EXCLUDED = "/usersgroups-query-api/query/api/rest/ping";
     private static final String PATH_EXCLUDED_METRICS = "/metrics/prometheus";
-    private static final UUID USER_ID = UUID.fromString("a05078bd-b189-4fd9-8c6e-181e9a743835");
+    private static final UUID USER_ID = UUID.fromString("a05078bd-b189-4fd9-8c6e-181e9a123456");
     private static final UUID USER_ID_UC = UUID.fromString("E3F58BF7-FB59-4E5C-8ED9-E6A0F5966743");
     private static final String ACTION_GET_HELLO = "GET /api/hello";
     private static final String ACTION_POST_ECHO = "POST /api/echo";
@@ -329,13 +329,14 @@ class HttpAuthzFilterTest {
         assertThat(httpAuthzFilter.validateUserId("")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("bad")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId("a05078bd")).isEmpty();
-        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a74383")).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e")).isEmpty();
+        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a1234567")).isEmpty();
         assertThat(httpAuthzFilter.validateUserId(USER_ID + "0")).isEmpty();
     }
 
     @Test
     void validate_userid_should_return_good_guid() {
-        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a743835").get()).isEqualTo(USER_ID);
+        assertThat(httpAuthzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a123456").get()).isEqualTo(USER_ID);
         assertThat(httpAuthzFilter.validateUserId("E3F58BF7-FB59-4E5C-8ED9-E6A0F5966743").get()).isEqualTo(USER_ID_UC);
     }
 
