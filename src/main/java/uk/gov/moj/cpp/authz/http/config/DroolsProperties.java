@@ -1,20 +1,22 @@
 package uk.gov.moj.cpp.authz.http.config;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-@AllArgsConstructor
 @Getter
 public class DroolsProperties {
-    @Value("${auth.rules.reloadOnEachRequest:true}")
-    private boolean reloadOnEachRequest = true;
 
-    @Value("${auth.rules.denyWhenNoRules:true}")
-    private boolean denyWhenNoRules = true;
+    public DroolsProperties(@Value("${auth.drools.reloadOnEachRequest:true}") boolean reloadOnEachRequest,
+                            @Value("${auth.drools.denyWhenNoRules:true}") boolean denyWhenNoRules,
+                            @Value("${auth.drools.enabled:droolsClasspathPattern}") String droolsClasspathPattern) {
+        this.reloadOnEachRequest = reloadOnEachRequest;
+        this.denyWhenNoRules = denyWhenNoRules;
+        this.droolsClasspathPattern = droolsClasspathPattern;
+    }
 
-    @Value("${auth.rules.enabled:droolsClasspathPattern}")
-    private String droolsClasspathPattern = "classpath:/acl/**/*.drl";
+    private boolean reloadOnEachRequest;
+    private boolean denyWhenNoRules;
+    private String droolsClasspathPattern;
 }

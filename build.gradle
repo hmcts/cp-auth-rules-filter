@@ -85,3 +85,7 @@ dependencies {
   api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
   api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
 }
+
+jar{
+  exclude("uk/gov/moj/cpp/authz/DummySpringApplication.class")
+}

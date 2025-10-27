@@ -40,7 +40,7 @@ public final class IdentityClient {
 
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
-        headers.add("Accept", headerProperties.getAcceptHeaderName());
+        headers.add("Accept", headerProperties.getAcceptHeader());
         headers.add(headerProperties.getUserIdHeaderName(), userId.toString());
 
         final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();

@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@Disabled // Needs some work
 class AuthIntegrationTest {
 
     @Resource

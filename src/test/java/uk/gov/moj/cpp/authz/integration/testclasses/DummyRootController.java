@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.authz.http;
+package uk.gov.moj.cpp.authz.integration.testclasses;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

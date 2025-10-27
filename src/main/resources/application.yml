@@ -2,4 +2,13 @@ auth:
   rules:
     identityUrlRoot: "http://localhost:8080"
     identityUrlPath: "/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions"
-    acceptHeader: "application/vnd.usersgroups.get-logged-in-user-permissions+json";
+    excludePathPrefixes: "/usersgroups-query-api/,/actuator,/error"
+    actionRequired: true
+    userIdHeaderName: "CJSCPPUID"
+    actionHeaderName: "CPP-ACTION"
+    acceptHeader: "application/vnd.usersgroups.get-logged-in-user-permissions+json"
+
+  drools:
+    reloadOnEachRequest: true
+    denyWhenNoRules: true
+    droolsClasspathPattern:

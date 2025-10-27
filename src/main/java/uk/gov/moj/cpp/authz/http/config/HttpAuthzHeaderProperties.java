@@ -1,23 +1,26 @@
 package uk.gov.moj.cpp.authz.http.config;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 @Getter
-@AllArgsConstructor
 public class HttpAuthzHeaderProperties {
-    @Value("${auth.rules.actionRequired:true}")
+
+    public HttpAuthzHeaderProperties(
+            @Value("${auth.rules.actionRequired:true}") boolean actionRequired,
+            @Value("${auth.rules.userIdHeaderName:CJSCPPUID}") String userIdHeaderName,
+            @Value("${auth.rules.actionHeaderName:CPP-ACTION}") String actionHeaderName,
+            @Value("${auth.rules.acceptHeader:application/vnd.usersgroups.get-logged-in-user-permissions+json}") String acceptHeader) {
+        this.actionRequired = actionRequired;
+        this.userIdHeaderName = userIdHeaderName;
+        this.actionHeaderName = actionHeaderName;
+        this.acceptHeader = acceptHeader;
+    }
+
     private boolean actionRequired;
-
-    @Value("${auth.rules.userIdHeaderName:CJSCPPUID}")
     private String userIdHeaderName;
-
-    @Value("${auth.rules.actionHeaderName:CPP-ACTION}")
     private String actionHeaderName;
-
-    @Value("${auth.rules.acceptHeaderName}")
-    private String acceptHeaderName;
+    private String acceptHeader;
 }
