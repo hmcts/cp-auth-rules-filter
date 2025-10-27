@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+import uk.gov.moj.cpp.authz.http.config.DroolsProperties;
 import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.authz.testsupport.TestConstants;
 
@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DroolsAuthzEngineTest {
-
 
     private static final String DROOLS_CLASSPATH_PATTERN = "classpath:/drool-test/**/*.drl";
 
@@ -32,10 +31,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenRuleMatchesActionAndGroup() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
+        final DroolsProperties properties = new DroolsProperties(false, true, DROOLS_CLASSPATH_PATTERN);
         final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
 
         final AuthzPrincipal principal =
@@ -55,10 +51,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void deniesWhenNoRuleMatches() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
+        final DroolsProperties properties = new DroolsProperties(false, true, DROOLS_CLASSPATH_PATTERN);
         final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
 
         final UserAndGroupProvider provider = (action, groups) -> false;
@@ -69,10 +62,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenVendorActionSjpDeleteFinancialMeansAndGroupIsLa() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
+        final DroolsProperties properties = new DroolsProperties(false, true, DROOLS_CLASSPATH_PATTERN);
         final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
 
         final AuthzPrincipal principal =
@@ -93,10 +83,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenVendorActionHearingGetDraftResultAndGroupIsLa() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
+        final DroolsProperties properties = new DroolsProperties(false, true, DROOLS_CLASSPATH_PATTERN);
         final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
 
         final AuthzPrincipal principal =

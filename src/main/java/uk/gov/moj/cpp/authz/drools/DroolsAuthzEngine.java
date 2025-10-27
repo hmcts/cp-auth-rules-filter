@@ -1,17 +1,16 @@
 package uk.gov.moj.cpp.authz.drools;
 
+import lombok.extern.slf4j.Slf4j;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+import uk.gov.moj.cpp.authz.http.config.DroolsProperties;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,16 +22,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
+@Slf4j
 public final class DroolsAuthzEngine {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DroolsAuthzEngine.class);
     private static final Pattern PACKAGE_PATTERN =
             Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*$", Pattern.MULTILINE);
 
-    private final HttpAuthzProperties properties;
+    private final DroolsProperties properties;
     private volatile List<RuleAsset> ruleAssets;
 
-    public DroolsAuthzEngine(final HttpAuthzProperties properties) {
+    public DroolsAuthzEngine(final DroolsProperties properties) {
         this.properties = properties;
     }
 
@@ -85,9 +84,9 @@ public final class DroolsAuthzEngine {
         }
         loaded.sort(Comparator.comparing(asset -> asset.sourcePath));
         this.ruleAssets = loaded;
-        if (LOGGER.isInfoEnabled()) {
+        if (log.isInfoEnabled()) {
             final List<String> paths = loaded.stream().map(asset -> asset.sourcePath).toList();
-            LOGGER.info("Loaded {} DRL resource(s): {}", loaded.size(), paths);
+            log.info("Loaded {} DRL resource(s): {}", loaded.size(), paths);
         }
     }
 
@@ -110,8 +109,8 @@ public final class DroolsAuthzEngine {
                 }
                 final Results verification = kieHelper.verify();
                 if (verification.hasMessages(Message.Level.ERROR)) {
-                    if (LOGGER.isErrorEnabled()) {
-                        LOGGER.error("Drools verification errors: {}", verification.getMessages(Message.Level.ERROR));
+                    if (log.isErrorEnabled()) {
+                        log.error("Drools verification errors: {}", verification.getMessages(Message.Level.ERROR));
                     }
                     result = !properties.isDenyWhenNoRules();
                 } else {
@@ -126,8 +125,8 @@ public final class DroolsAuthzEngine {
                 }
             }
         } catch (final Exception exception) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Drools evaluation failed; denying access", exception);
+            if (log.isErrorEnabled()) {
+                log.error("Drools evaluation failed; denying access", exception);
             }
             result = false;
         }

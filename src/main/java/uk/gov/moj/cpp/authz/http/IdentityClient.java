@@ -5,8 +5,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzHeaderProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzPathProperties;
 import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
 
 import java.net.MalformedURLException;
@@ -17,12 +19,15 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
+@Service
 public final class IdentityClient {
-    private final HttpAuthzProperties properties;
+    private final HttpAuthzPathProperties pathProperties;
+    private final HttpAuthzHeaderProperties headerProperties;
     private final RestTemplate restTemplate;
 
-    public IdentityClient(final HttpAuthzProperties properties) {
-        this.properties = properties;
+    public IdentityClient(final HttpAuthzPathProperties pathProperties, final HttpAuthzHeaderProperties headerProperties) {
+        this.pathProperties = pathProperties;
+        this.headerProperties = headerProperties;
         final SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) Duration.ofSeconds(20).toMillis());
         factory.setReadTimeout((int) Duration.ofSeconds(21).toMillis());
@@ -30,13 +35,13 @@ public final class IdentityClient {
     }
 
     public IdentityResponse fetchIdentity(final UUID userId) {
-        final String urlPath = properties.getIdentityUrlPath().replace("{userId}", userId.toString());
-        final URI url = constructUrl(properties.getIdentityUrlRoot(), urlPath);
+        final String urlPath = pathProperties.getIdentityUrlPath().replace("{userId}", userId.toString());
+        final URI url = constructUrl(pathProperties.getIdentityUrlRoot(), urlPath);
 
         final HttpHeaders headers = new HttpHeaders();
         final IdentityResponse identityResponse;
-        headers.add("Accept", properties.getAcceptHeader());
-        headers.add(properties.getUserIdHeader(), userId.toString());
+        headers.add("Accept", headerProperties.getAcceptHeaderName());
+        headers.add(headerProperties.getUserIdHeaderName(), userId.toString());
 
         final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();
         final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
