@@ -45,7 +45,7 @@ public class AuthzAutoConfiguration {
 
     @SneakyThrows
     private void logProperties() {
-        ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = new ObjectMapper();
         log.info("AuthRulesFilter pathProperties -> {}", mapper.writeValueAsString(pathProperties));
         log.info("AuthRulesFilter headerProperties  -> {}", mapper.writeValueAsString(headerProperties));
         log.info("AuthRulesFilter droolsProperties -> {}", mapper.writeValueAsString(droolsProperties));
