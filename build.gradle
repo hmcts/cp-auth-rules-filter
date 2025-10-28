@@ -7,6 +7,13 @@ plugins {
 
 group = 'uk.gov.hmcts.cp'
 version = System.getProperty('API_SPEC_VERSION') ?: '0.0.999'
+
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(21))
+  }
+}
+
 def githubActor = project.findProperty("github.actor") ?: System.getenv("GITHUB_ACTOR")
 def githubToken = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
 def githubRepo = System.getenv("GITHUB_REPOSITORY")
@@ -84,8 +91,4 @@ dependencies {
   api "org.mvel:mvel2:2.5.2.Final"
   api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
   api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
-}
-
-jar{
-  exclude("uk/gov/moj/cpp/authz/DummySpringApplication.class")
 }

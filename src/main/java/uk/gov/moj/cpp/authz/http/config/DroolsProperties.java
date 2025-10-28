@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Getter
 public class DroolsProperties {
+    private final boolean reloadOnEachRequest;
+    private final boolean denyWhenNoRules;
+    private final String droolsClasspathPattern;
 
     public DroolsProperties(@Value("${auth.drools.reloadOnEachRequest}") boolean reloadOnEachRequest,
                             @Value("${auth.drools.denyWhenNoRules}") boolean denyWhenNoRules,
@@ -15,8 +18,4 @@ public class DroolsProperties {
         this.denyWhenNoRules = denyWhenNoRules;
         this.droolsClasspathPattern = droolsClasspathPattern;
     }
-
-    private boolean reloadOnEachRequest;
-    private boolean denyWhenNoRules;
-    private String droolsClasspathPattern;
 }

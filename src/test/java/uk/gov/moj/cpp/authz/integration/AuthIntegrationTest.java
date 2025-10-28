@@ -39,7 +39,7 @@ class AuthIntegrationTest {
     ArgumentCaptor<String> stringCaptor;
 
     @Test
-    void hello_endpoint_should_be_authorised() throws Exception {
+    void default_endpoint_should_be_forbidden() throws Exception {
         UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
         final String actionHeader = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
         mockMvc
@@ -51,17 +51,18 @@ class AuthIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(""));
     }
-//    @Test
-//    void hello_endpoint_should_be_authorised() throws Exception {
-//        UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
-//        final String actionHeader = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
-//        mockMvc
-//                .perform(
-//                        get("/api/hello")
-//                                .header(headerProperties.getActionHeaderName(), actionHeader)
-//                                .header(headerProperties.getUserIdHeaderName(), userId))
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(content().string("Hello"));
-//    }
+
+    @Test
+    void hello_endpoint_should_be_authorised() throws Exception {
+        UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
+        final String actionHeader = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
+        mockMvc
+                .perform(
+                        get("/api/hello")
+                                .header(headerProperties.getActionHeaderName(), actionHeader)
+                                .header(headerProperties.getUserIdHeaderName(), userId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("Hello"));
+    }
 }

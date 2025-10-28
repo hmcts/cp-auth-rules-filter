@@ -77,9 +77,6 @@ public final class DroolsAuthzEngine {
         for (final Resource resource : resources) {
             String fileName = resource.getFilename();
             log.info("Loading drools rules using rules file:{}", resource.getURI());
-            if (fileName == null || fileName.isBlank()) {
-                fileName = "file" + (sequence++) + ".drl";
-            }
             final String content = readResourceContent(resource);
             final String sourcePath = resolveSourcePath(content, fileName);
             loaded.add(new RuleAsset(content, sourcePath));
@@ -109,9 +106,7 @@ public final class DroolsAuthzEngine {
                 }
                 final Results verification = kieHelper.verify();
                 if (verification.hasMessages(Message.Level.ERROR)) {
-                    if (log.isErrorEnabled()) {
-                        log.error("Drools verification errors: {}", verification.getMessages(Message.Level.ERROR));
-                    }
+                    log.error("Drools verification errors: {}", verification.getMessages(Message.Level.ERROR));
                     result = !properties.isDenyWhenNoRules();
                 } else {
                     try (KieSession kieSession = kieHelper.build().newKieSession()) {

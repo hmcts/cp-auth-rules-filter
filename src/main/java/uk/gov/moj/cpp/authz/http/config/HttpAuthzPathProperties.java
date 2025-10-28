@@ -9,6 +9,9 @@ import java.util.List;
 @Component
 @Getter
 public class HttpAuthzPathProperties {
+    private final String identityUrlRoot;
+    private final String identityUrlPath;
+    private final List<String> excludePathPrefixes;
 
     public HttpAuthzPathProperties(@Value("${auth.rules.identityUrlRoot}") String identityUrlRoot,
                                    @Value("${auth.rules.identityUrlPath}") String identityUrlPath,
@@ -17,8 +20,4 @@ public class HttpAuthzPathProperties {
         this.identityUrlPath = identityUrlPath;
         this.excludePathPrefixes = excludePathPrefixes;
     }
-
-    private String identityUrlRoot;
-    private String identityUrlPath;
-    private List<String> excludePathPrefixes;
 }

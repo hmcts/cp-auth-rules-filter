@@ -43,8 +43,10 @@ public final class HttpAuthzFilter implements Filter {
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
         if (pathProperties.getExcludePathPrefixes().stream().anyMatch(pathWithinApplication::startsWith)) {
+            log.info("AuthFilter skipping excluded path");
             filterChain.doFilter(request, response);
         } else {
+            log.info("AuthFilter processing included path");
             final Optional<UUID> userId = validateUserId(httpRequest.getHeader(headerProperties.getUserIdHeaderName()));
             if (userId.isEmpty()) {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing header: " + headerProperties.getUserIdHeaderName());
