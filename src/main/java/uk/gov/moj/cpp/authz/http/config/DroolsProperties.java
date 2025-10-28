@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 @Getter
 public class DroolsProperties {
 
-    public DroolsProperties(@Value("${auth.drools.reloadOnEachRequest:true}") boolean reloadOnEachRequest,
-                            @Value("${auth.drools.denyWhenNoRules:true}") boolean denyWhenNoRules,
-                            @Value("${auth.drools.enabled:droolsClasspathPattern}") String droolsClasspathPattern) {
+    public DroolsProperties(@Value("${auth.drools.reloadOnEachRequest}") boolean reloadOnEachRequest,
+                            @Value("${auth.drools.denyWhenNoRules}") boolean denyWhenNoRules,
+                            @Value("${auth.drools.droolsClasspathPattern}") String droolsClasspathPattern) {
         this.reloadOnEachRequest = reloadOnEachRequest;
         this.denyWhenNoRules = denyWhenNoRules;
         this.droolsClasspathPattern = droolsClasspathPattern;

@@ -37,22 +37,22 @@ public final class IdentityClient {
     public IdentityResponse fetchIdentity(final UUID userId) {
         final String urlPath = pathProperties.getIdentityUrlPath().replace("{userId}", userId.toString());
         final URI url = constructUrl(pathProperties.getIdentityUrlRoot(), urlPath);
-
         final HttpHeaders headers = new HttpHeaders();
-        final IdentityResponse identityResponse;
         headers.add("Accept", headerProperties.getAcceptHeader());
         headers.add(headerProperties.getUserIdHeaderName(), userId.toString());
-
         final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();
-        final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
-        final LoggedInUserPermissionsResponse body = response.getBody();
-        if (body == null) {
-            log.error("Empty identity response");
-            identityResponse = new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
-        } else {
-            identityResponse = new IdentityResponse(userId, body.groups(), body.permissions());
+        try {
+            final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
+            if (response == null || response.getBody() == null) {
+                log.error("Empty identity response");
+                return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
+            } else {
+                return new IdentityResponse(userId, response.getBody().groups(), response.getBody().permissions());
+            }
+        } catch (Exception e) {
+            log.error("Exception fetching identity ", e);
+            throw e;
         }
-        return identityResponse;
     }
 
     public URI constructUrl(final String root, final String path) {

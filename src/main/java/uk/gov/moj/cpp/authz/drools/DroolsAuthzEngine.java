@@ -69,12 +69,14 @@ public final class DroolsAuthzEngine {
     }
 
     private synchronized void loadRules() throws IOException {
+        log.info("Loading drools rules matching pattern:{}", properties.getDroolsClasspathPattern());
         final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         final Resource[] resources = resolver.getResources(properties.getDroolsClasspathPattern());
         final List<RuleAsset> loaded = new ArrayList<>();
         int sequence = 0;
         for (final Resource resource : resources) {
             String fileName = resource.getFilename();
+            log.info("Loading drools rules using rules file:{}", resource.getURI());
             if (fileName == null || fileName.isBlank()) {
                 fileName = "file" + (sequence++) + ".drl";
             }
@@ -84,10 +86,8 @@ public final class DroolsAuthzEngine {
         }
         loaded.sort(Comparator.comparing(asset -> asset.sourcePath));
         this.ruleAssets = loaded;
-        if (log.isInfoEnabled()) {
-            final List<String> paths = loaded.stream().map(asset -> asset.sourcePath).toList();
-            log.info("Loaded {} DRL resource(s): {}", loaded.size(), paths);
-        }
+        final List<String> paths = loaded.stream().map(asset -> asset.sourcePath).toList();
+        log.info("Loaded {} DRL resource(s): {}", loaded.size(), paths);
     }
 
     private void ensureRules() throws IOException {
@@ -125,9 +125,7 @@ public final class DroolsAuthzEngine {
                 }
             }
         } catch (final Exception exception) {
-            if (log.isErrorEnabled()) {
-                log.error("Drools evaluation failed; denying access", exception);
-            }
+            log.error("Drools evaluation failed; denying access", exception);
             result = false;
         }
         return result;

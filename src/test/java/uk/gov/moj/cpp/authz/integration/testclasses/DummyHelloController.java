@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @Slf4j
-public class DummyRootController {
+public class DummyHelloController {
 
-    @PostMapping("/")
-    public ResponseEntity<String> rootEndpoint() {
-        log.info("/ endpoint hit");
+    @PostMapping("/api/hello")
+    public ResponseEntity<String> helloEndpoint() {
+        log.info("/api/hello endpoint hit");
         return ResponseEntity.ok("Hello");
     }
 }

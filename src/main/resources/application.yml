@@ -11,4 +11,4 @@ auth:
   drools:
     reloadOnEachRequest: true
     denyWhenNoRules: true
-    droolsClasspathPattern:
+    droolsClasspathPattern: classpath:/drools-test/**/*.drl

@@ -72,7 +72,7 @@ class RequestActionResolverTest {
 
         final ResolvedAction resolved = actionResolver.resolve(request, HEADER_CPP_ACTION, PATH_HELLO);
 
-        assertEquals("hearing.get-draft-result", resolved.getName(), "Content-Type vendor should win");
+        assertEquals("hearing.get-draft-result", resolved.getActionName(), "Content-Type vendor should win");
     }
 
     @Test
@@ -103,7 +103,7 @@ class RequestActionResolverTest {
 
         final ResolvedAction resolved = actionResolver.resolve(request, HEADER_CPP_ACTION, PATH_HELLO);
 
-        assertEquals("sjp.delete-financial-means", resolved.getName(), "Should resolve from Accept when no Content-Type vendor");
+        assertEquals("sjp.delete-financial-means", resolved.getActionName(), "Should resolve from Accept when no Content-Type vendor");
     }
 
     @Test
@@ -126,7 +126,7 @@ class RequestActionResolverTest {
         final ResolvedAction resolved =
                 actionResolver.resolve(request, HEADER_CPP_ACTION, PATH_HELLO);
 
-        assertEquals(COMPUTED_GET_HELLO, resolved.getName(), "Should use explicit header when no vendor present");
+        assertEquals(COMPUTED_GET_HELLO, resolved.getActionName(), "Should use explicit header when no vendor present");
     }
 
     @Test
@@ -148,7 +148,7 @@ class RequestActionResolverTest {
 
         final ResolvedAction resolved = actionResolver.resolve(request, HEADER_CPP_ACTION, PATH_HELLO);
 
-        assertEquals(COMPUTED_GET_HELLO, resolved.getName(), "Should compute '<METHOD> <PATH>' when no vendor/header");
+        assertEquals(COMPUTED_GET_HELLO, resolved.getActionName(), "Should compute '<METHOD> <PATH>' when no vendor/header");
     }
 
     @Test
@@ -177,6 +177,6 @@ class RequestActionResolverTest {
 
         final ResolvedAction resolved = actionResolver.resolve(request, null, PATH_HELLO);
 
-        assertEquals(COMPUTED_GET_HELLO, resolved.getName(), "Should compute '<METHOD> <PATH>' with null header name");
+        assertEquals(COMPUTED_GET_HELLO, resolved.getActionName(), "Should compute '<METHOD> <PATH>' with null header name");
     }
 }

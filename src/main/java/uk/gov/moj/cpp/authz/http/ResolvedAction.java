@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class ResolvedAction {
-    private String name;
+    private String actionName;
     private boolean vendorSupplied;
     private boolean headerSupplied;
 }

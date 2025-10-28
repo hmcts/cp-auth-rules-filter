@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DroolsAuthzEngineTest {
 
-    private static final String DROOLS_CLASSPATH_PATTERN = "classpath:/drool-test/**/*.drl";
+    private static final String DROOLS_CLASSPATH_PATTERN = "classpath:/drools-test/**/*.drl";
 
     private final UUID userId = UUID.randomUUID();
 

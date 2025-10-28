@@ -75,7 +75,7 @@ public final class HttpAuthzFilter implements Filter {
         attributes.put("method", request.getMethod());
         attributes.put("path", pathWithinApplication);
 
-        final Action action = new Action(resolvedAction.getName(), attributes);
+        final Action action = new Action(resolvedAction.getActionName(), attributes);
         final RequestUserAndGroupProvider perRequestProvider = new RequestUserAndGroupProvider(principal);
 
         return droolsAuthzEngine.evaluate(perRequestProvider, action);

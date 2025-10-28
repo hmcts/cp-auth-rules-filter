@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.authz.http;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Service;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
  * 3) Explicit action header (e.g., CPP-ACTION)
  * 4) Computed: "<METHOD> <PATH>"
  */
+@Service
 public final class RequestActionResolver {
 
     private static final String ACCEPT = "Accept";
