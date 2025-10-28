@@ -73,12 +73,9 @@ public final class DroolsAuthzEngine {
         final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         final Resource[] resources = resolver.getResources(properties.getDroolsClasspathPattern());
         final List<RuleAsset> loaded = new ArrayList<>();
-        int sequence = 0;
         for (final Resource resource : resources) {
-            String fileName = resource.getFilename();
-            log.info("Loading drools rules using rules file:{}", resource.getURI());
             final String content = readResourceContent(resource);
-            final String sourcePath = resolveSourcePath(content, fileName);
+            final String sourcePath = resolveSourcePath(content, resource.getFilename());
             loaded.add(new RuleAsset(content, sourcePath));
         }
         loaded.sort(Comparator.comparing(asset -> asset.sourcePath));
