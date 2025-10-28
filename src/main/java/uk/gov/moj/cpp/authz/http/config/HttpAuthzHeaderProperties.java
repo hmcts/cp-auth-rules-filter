@@ -13,9 +13,9 @@ public class HttpAuthzHeaderProperties {
     private final String acceptHeader;
 
     public HttpAuthzHeaderProperties(
-            @Value("${auth.rules.actionRequired:true}") boolean actionRequired,
-            @Value("${auth.rules.userIdHeaderName:CJSCPPUID}") String userIdHeaderName,
-            @Value("${auth.rules.actionHeaderName:CPP-ACTION}") String actionHeaderName,
+            @Value("${auth.rules.actionRequired:true}") final boolean actionRequired,
+            @Value("${auth.rules.userIdHeaderName:CJSCPPUID}") final String userIdHeaderName,
+            @Value("${auth.rules.actionHeaderName:CPP-ACTION}") final String actionHeaderName,
             @Value("${auth.rules.acceptHeader:application/vnd.usersgroups.get-logged-in-user-permissions+json}") String acceptHeader) {
         this.actionRequired = actionRequired;
         this.userIdHeaderName = userIdHeaderName;

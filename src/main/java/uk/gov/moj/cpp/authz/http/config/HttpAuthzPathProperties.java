@@ -13,9 +13,9 @@ public class HttpAuthzPathProperties {
     private final String identityUrlPath;
     private final List<String> excludePathPrefixes;
 
-    public HttpAuthzPathProperties(@Value("${auth.rules.identityUrlRoot}") String identityUrlRoot,
-                                   @Value("${auth.rules.identityUrlPath}") String identityUrlPath,
-                                   @Value("${auth.rules.excludePathPrefixes}") List<String> excludePathPrefixes) {
+    public HttpAuthzPathProperties(@Value("${auth.rules.identityUrlRoot}") final String identityUrlRoot,
+                                   @Value("${auth.rules.identityUrlPath}") final String identityUrlPath,
+                                   @Value("${auth.rules.excludePathPrefixes}") final List<String> excludePathPrefixes) {
         this.identityUrlRoot = identityUrlRoot;
         this.identityUrlPath = identityUrlPath;
         this.excludePathPrefixes = excludePathPrefixes;
