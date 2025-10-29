@@ -58,7 +58,7 @@ Some changes to previous implementation
 ```
 KieBuilderImpl    : File '/Projects/cp-auth-rules-filter/build/resources/test/drools/route-rules.drl' 
 is in folder '/Users/colingreenwood/IdeaProjects/cp-auth-rules-filter/build/resources/test/drools' 
-but declares package 'uk.gov.moj.cpp.auth.demo'. 
+but declares package 'uk.gov.moj.cpp.authz.demo'. 
 It is recommended to have a correspondance between package and folder names
 ```
 
