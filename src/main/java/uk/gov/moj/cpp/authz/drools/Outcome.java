@@ -1,15 +1,12 @@
 package uk.gov.moj.cpp.authz.drools;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter // sadly we need a mutable setter as setSuccess called in the drools rules
 public final class Outcome {
     private boolean success;
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(final boolean success) {
-        this.success = success;
-    }
 
     @Override
     public String toString() {

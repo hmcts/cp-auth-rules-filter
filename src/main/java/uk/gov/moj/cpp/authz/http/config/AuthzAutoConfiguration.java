@@ -1,77 +1,52 @@
 package uk.gov.moj.cpp.authz.http.config;
 
-import jakarta.annotation.PostConstruct;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import tools.jackson.databind.ObjectMapper;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
-import uk.gov.moj.cpp.authz.http.DefaultIdentityToGroupsMapper;
 import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
 import uk.gov.moj.cpp.authz.http.IdentityClient;
 import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
+import uk.gov.moj.cpp.authz.http.RequestActionResolver;
 
-@AutoConfiguration
-@EnableConfigurationProperties(HttpAuthzProperties.class)
-@ConditionalOnProperty(prefix = "authz.http", name = "enabled", havingValue = "true")
+@Configuration
+@AllArgsConstructor
 @Slf4j
 public class AuthzAutoConfiguration {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthzAutoConfiguration.class);
+    private static final int AUTH_FILTER_PRIORITY = Ordered.HIGHEST_PRECEDENCE + 30;
 
-    private final HttpAuthzProperties properties;
+    private final HttpAuthzPathProperties pathProperties;
+    private final HttpAuthzHeaderProperties headerProperties;
 
-    public AuthzAutoConfiguration(final HttpAuthzProperties properties) {
-        this.properties = properties;
-    }
-
-    @PostConstruct
-    private void onStart() {
-        final String propertiesJson = new ObjectMapper().writeValueAsString(properties);
-        log.info("CPP HTTP Authz starter ACTIVE -> {}", propertiesJson);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public IdentityClient identityClient(final HttpAuthzProperties properties) {
-        return new IdentityClient(properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(IdentityToGroupsMapper.class)
-    public IdentityToGroupsMapper identityToGroupsMapper(final HttpAuthzProperties properties) {
-        return new DefaultIdentityToGroupsMapper(properties);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public DroolsAuthzEngine droolsAuthzEngine(final HttpAuthzProperties properties) {
-        return new DroolsAuthzEngine(properties);
-    }
 
     @Bean
     public FilterRegistrationBean<HttpAuthzFilter> httpAuthzFilterRegistration(
-            final HttpAuthzProperties properties,
+            final HttpAuthzPathProperties pathProperties,
+            final HttpAuthzHeaderProperties headerProperties,
+            final RequestActionResolver actionResolver,
             final IdentityClient identityClient,
             final IdentityToGroupsMapper identityToGroupsMapper,
             final DroolsAuthzEngine droolsAuthzEngine) {
-
+        logProperties();
         final HttpAuthzFilter filter =
-                new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine);
+                new HttpAuthzFilter(pathProperties, headerProperties, actionResolver, identityClient, identityToGroupsMapper, droolsAuthzEngine);
         final FilterRegistrationBean<HttpAuthzFilter> registration = new FilterRegistrationBean<>(filter);
-        final int order = properties.getFilterOrder() != null
-                ? properties.getFilterOrder()
-                : Ordered.HIGHEST_PRECEDENCE + 30;
-        registration.setOrder(order);
+        registration.setOrder(AUTH_FILTER_PRIORITY);
         registration.addUrlPatterns("/*");
         registration.setName("cppHttpAuthzFilter");
         return registration;
+    }
+
+    @SneakyThrows
+    private void logProperties() {
+        final ObjectMapper mapper = new ObjectMapper();
+        log.info("AuthRulesFilter pathProperties -> {}", mapper.writeValueAsString(pathProperties));
+        log.info("AuthRulesFilter headerProperties  -> {}", mapper.writeValueAsString(headerProperties));
     }
 }

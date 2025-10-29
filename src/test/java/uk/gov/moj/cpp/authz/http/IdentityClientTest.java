@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -15,9 +16,9 @@ class IdentityClientTest {
 
     @Test
     void properties_url_should_accept_valid_url() {
-        identityClient.constructUrl("http://localhost", "/path");
-        identityClient.constructUrl("http://localhost:8080", "/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions");
-        // no exception
+        assertThat(identityClient.constructUrl("http://localhost", "/path").toString()).isEqualTo("http://localhost/path");
+        String path = "/usersgroups-query-api/permissions";
+        assertThat(identityClient.constructUrl("http://localhost:8090", path).toString()).isEqualTo("http://localhost:8090/usersgroups-query-api/permissions");
     }
 
     @Test

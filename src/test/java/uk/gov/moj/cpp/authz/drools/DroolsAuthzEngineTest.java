@@ -1,13 +1,16 @@
 package uk.gov.moj.cpp.authz.drools;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import uk.gov.moj.cpp.authz.drools.service.DroolsRulesFileService;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.authz.testsupport.TestConstants;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -15,31 +18,20 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class DroolsAuthzEngineTest {
 
+    private static final UUID USER_ID = UUID.randomUUID();
 
-    private static final String DROOLS_CLASSPATH_PATTERN = "classpath:/drool-test/**/*.drl";
-
-    private final UUID userId = UUID.randomUUID();
-
-    @BeforeAll
-    static void prepare() {
-        System.setProperty("mvel2.disable.jit", "true");
-        System.setProperty("drools.compiler", "ECLIPSE");
-        System.setProperty("drools.dialect.default", "java");
-    }
+    List<RuleAsset> rules = new DroolsRulesFileService(new PathMatchingResourcePatternResolver()).getRules();
 
     @Test
     @Timeout(5)
     void allowsWhenRuleMatchesActionAndGroup() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
+        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
 
         final AuthzPrincipal principal =
-                new AuthzPrincipal(userId, "fn", "ln", "u1@example.test", Set.of(TestConstants.GROUP_LA));
+                new AuthzPrincipal(USER_ID, "fn", "ln", "u1@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
             for (final String g : groups) {
                 if (principal.groups().stream().anyMatch(s -> s.equalsIgnoreCase(g))) {
@@ -55,11 +47,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void deniesWhenNoRuleMatches() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
+        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
 
         final UserAndGroupProvider provider = (action, groups) -> false;
         final Action action = new Action(TestConstants.ACTION_ECHO, Map.of());
@@ -69,14 +57,9 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenVendorActionSjpDeleteFinancialMeansAndGroupIsLa() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
-
+        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
         final AuthzPrincipal principal =
-                new AuthzPrincipal(userId, "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA));
+                new AuthzPrincipal(USER_ID, "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
             for (final String g : groups) {
                 if (principal.groups().stream().anyMatch(s -> s.equalsIgnoreCase(g))) {
@@ -93,14 +76,9 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenVendorActionHearingGetDraftResultAndGroupIsLa() {
-        final HttpAuthzProperties properties = new HttpAuthzProperties();
-        properties.setDroolsClasspathPattern(DROOLS_CLASSPATH_PATTERN);
-        properties.setReloadOnEachRequest(false);
-        properties.setDenyWhenNoRules(true);
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
-
+        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
         final AuthzPrincipal principal =
-                new AuthzPrincipal(userId, "fn", "ln", "u3@example.test", Set.of(TestConstants.GROUP_LA));
+                new AuthzPrincipal(USER_ID, "fn", "ln", "u3@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
             for (final String g : groups) {
                 if (principal.groups().stream().anyMatch(s -> s.equalsIgnoreCase(g))) {

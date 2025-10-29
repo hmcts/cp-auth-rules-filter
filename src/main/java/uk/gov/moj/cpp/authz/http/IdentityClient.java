@@ -5,8 +5,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzHeaderProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzPathProperties;
 import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
 
 import java.net.MalformedURLException;
@@ -17,37 +19,47 @@ import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
+@Service
 public final class IdentityClient {
-    private final HttpAuthzProperties properties;
+    private final HttpAuthzPathProperties pathProperties;
+    private final HttpAuthzHeaderProperties headerProperties;
     private final RestTemplate restTemplate;
 
-    public IdentityClient(final HttpAuthzProperties properties) {
-        this.properties = properties;
+    public IdentityClient(final HttpAuthzPathProperties pathProperties, final HttpAuthzHeaderProperties headerProperties) {
+        this.pathProperties = pathProperties;
+        this.headerProperties = headerProperties;
         final SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) Duration.ofSeconds(20).toMillis());
         factory.setReadTimeout((int) Duration.ofSeconds(21).toMillis());
         this.restTemplate = new RestTemplate(factory);
     }
 
+    /**
+     * PMD LooseCoupling warning on HttpHeaders ... how can we fix this ?
+     * MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+     * RequestEntity.get(url).headers((HttpHeaders) httpHeaders)
+     * ... then get warned to use HttpHeaders to avoid the cast :)
+     */
+    @SuppressWarnings("PMD.LooseCoupling")
     public IdentityResponse fetchIdentity(final UUID userId) {
-        final String urlPath = properties.getIdentityUrlPath().replace("{userId}", userId.toString());
-        final URI url = constructUrl(properties.getIdentityUrlRoot(), urlPath);
-
-        final HttpHeaders headers = new HttpHeaders();
-        final IdentityResponse identityResponse;
-        headers.add("Accept", properties.getAcceptHeader());
-        headers.add(properties.getUserIdHeader(), userId.toString());
-
-        final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();
-        final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
-        final LoggedInUserPermissionsResponse body = response.getBody();
-        if (body == null) {
-            log.error("Empty identity response");
-            identityResponse = new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
-        } else {
-            identityResponse = new IdentityResponse(userId, body.groups(), body.permissions());
+        final String urlPath = pathProperties.getIdentityUrlPath().replace("{userId}", userId.toString());
+        final URI url = constructUrl(pathProperties.getIdentityUrlRoot(), urlPath);
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Accept", headerProperties.getAcceptHeader());
+        httpHeaders.add(headerProperties.getUserIdHeaderName(), userId.toString());
+        final RequestEntity<Void> request = RequestEntity.get(url).headers(httpHeaders).build();
+        try {
+            final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
+            if (response == null || response.getBody() == null) {
+                log.error("Empty identity response");
+                return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
+            } else {
+                return new IdentityResponse(userId, response.getBody().groups(), response.getBody().permissions());
+            }
+        } catch (Exception e) {
+            log.error("Exception fetching identity ", e);
+            throw e;
         }
-        return identityResponse;
     }
 
     public URI constructUrl(final String root, final String path) {
