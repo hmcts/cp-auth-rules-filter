@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.moj.cpp.authz.testsupport.TestConstants.ACTION_HELLO;
+import static uk.gov.moj.cpp.authz.testsupport.TestConstants.USER_LA_1;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
@@ -27,25 +29,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "auth.rules.excludePathPrefixes=/usersgroups-query-api"})
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
-class FilterIntegrationTest {
+class HttpAuthFilterIntegrationTest {
     @Autowired
     HttpAuthHeaderProperties headerProperties;
 
     @Resource
     private MockMvc mockMvc;
 
-    @Captor
-    ArgumentCaptor<String> stringCaptor;
-
     @Test
     void default_endpoint_should_be_forbidden() throws Exception {
-        UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
         final String actionHeader = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
         MvcResult result = mockMvc
                 .perform(
                         get("/api/hello")
                                 .header(headerProperties.getActionHeaderName(), actionHeader)
-                                .header(headerProperties.getUserIdHeaderName(), userId))
+                                .header(headerProperties.getUserIdHeaderName(), USER_LA_1))
                 .andDo(print())
                 .andExpect(status().isForbidden())
                 .andReturn();
@@ -54,11 +52,23 @@ class FilterIntegrationTest {
 
     @Test
     void hello_endpoint_with_no_action_should_be_authorised() throws Exception {
-        UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
         MvcResult result = mockMvc
                 .perform(
                         get("/api/hello")
-                                .header(headerProperties.getUserIdHeaderName(), userId))
+                                .header(headerProperties.getUserIdHeaderName(), USER_LA_1))
+                .andDo(print())
+                .andReturn();
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Hello");
+    }
+
+    @Test
+    void hello_endpoint_with_explicit_action_should_be_authorised() throws Exception {
+        MvcResult result = mockMvc
+                .perform(
+                        get("/api/hello")
+                                .header(headerProperties.getUserIdHeaderName(), USER_LA_1)
+                                .header(headerProperties.getActionHeaderName(), ACTION_HELLO))
                 .andDo(print())
                 .andReturn();
         assertThat(result.getResponse().getStatus()).isEqualTo(200);
