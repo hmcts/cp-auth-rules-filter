@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
+import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
 import uk.gov.moj.cpp.authz.drools.Action;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
 import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DroolsIntegrationTest {
 
     @Autowired
-    DroolsAuthzEngine droolsAuthzEngine;
+    DroolsAuthEngine droolsAuthEngine;
 
     @SneakyThrows
     @Test
@@ -32,7 +32,7 @@ class DroolsIntegrationTest {
 
         UserAndGroupProviderImpl userAndGroupProvider = new UserAndGroupProviderImpl(authzPrincipal);
         log.info("Running drools evaluate");
-        boolean response = droolsAuthzEngine.evaluate(userAndGroupProvider, action);
+        boolean response = droolsAuthEngine.evaluate(userAndGroupProvider, action);
         assertThat(response).isTrue();
     }
 }

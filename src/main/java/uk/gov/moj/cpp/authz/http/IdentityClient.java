@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzHeaderProperties;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzPathProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
 import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
 
 import java.net.MalformedURLException;
@@ -21,11 +21,11 @@ import java.util.UUID;
 @Slf4j
 @Service
 public final class IdentityClient {
-    private final HttpAuthzPathProperties pathProperties;
-    private final HttpAuthzHeaderProperties headerProperties;
+    private final HttpAuthPathProperties pathProperties;
+    private final HttpAuthHeaderProperties headerProperties;
     private final RestTemplate restTemplate;
 
-    public IdentityClient(final HttpAuthzPathProperties pathProperties, final HttpAuthzHeaderProperties headerProperties) {
+    public IdentityClient(final HttpAuthPathProperties pathProperties, final HttpAuthHeaderProperties headerProperties) {
         this.pathProperties = pathProperties;
         this.headerProperties = headerProperties;
         final SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();

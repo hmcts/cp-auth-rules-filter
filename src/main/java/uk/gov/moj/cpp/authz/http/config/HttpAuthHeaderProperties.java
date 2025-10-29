@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Getter
-public class HttpAuthzHeaderProperties {
+public class HttpAuthHeaderProperties {
     private final boolean actionRequired;
     private final String userIdHeaderName;
     private final String actionHeaderName;
     private final String acceptHeader;
 
-    public HttpAuthzHeaderProperties(
+    public HttpAuthHeaderProperties(
             @Value("${auth.rules.actionRequired:true}") final boolean actionRequired,
             @Value("${auth.rules.userIdHeaderName:CJSCPPUID}") final String userIdHeaderName,
             @Value("${auth.rules.actionHeaderName:CPP-ACTION}") final String actionHeaderName,

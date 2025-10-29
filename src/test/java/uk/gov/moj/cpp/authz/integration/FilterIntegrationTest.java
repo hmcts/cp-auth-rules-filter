@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.authz.integration;
 
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzHeaderProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
 
 import java.util.UUID;
 
@@ -28,10 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "auth.rules.excludePathPrefixes=/testidentity"})
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
-@Slf4j
-class AuthIntegrationTest {
+class FilterIntegrationTest {
     @Autowired
-    HttpAuthzHeaderProperties headerProperties;
+    HttpAuthHeaderProperties headerProperties;
 
     @Resource
     private MockMvc mockMvc;

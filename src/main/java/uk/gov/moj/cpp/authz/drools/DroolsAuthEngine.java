@@ -18,7 +18,7 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 @Slf4j
-public final class DroolsAuthzEngine {
+public final class DroolsAuthEngine {
 
     private List<RuleAsset> ruleAssets;
 

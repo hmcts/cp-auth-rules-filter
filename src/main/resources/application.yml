@@ -2,6 +2,7 @@ server:
   port: 8090
 auth:
   rules:
+    disabled: false
     identityUrlRoot: "http://localhost:8090"
     identityUrlPath: "/usersgroups-query-api/query/api/rest/usersgroups/users/logged-in-user/permissions"
     excludePathPrefixes: "/usersgroups-query-api/,/actuator,/error"

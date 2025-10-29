@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class DroolsAuthzEngineTest {
+class DroolsAuthEngineTest {
 
     private static final UUID USER_ID = UUID.randomUUID();
 
@@ -28,7 +28,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenRuleMatchesActionAndGroup() {
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
+        final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
 
         final AuthzPrincipal principal =
                 new AuthzPrincipal(USER_ID, "fn", "ln", "u1@example.test", Set.of(TestConstants.GROUP_LA));
@@ -47,7 +47,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void deniesWhenNoRuleMatches() {
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
+        final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
 
         final UserAndGroupProvider provider = (action, groups) -> false;
         final Action action = new Action(TestConstants.ACTION_ECHO, Map.of());
@@ -57,7 +57,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenVendorActionSjpDeleteFinancialMeansAndGroupIsLa() {
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
+        final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
         final AuthzPrincipal principal =
                 new AuthzPrincipal(USER_ID, "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
@@ -76,7 +76,7 @@ class DroolsAuthzEngineTest {
     @Test
     @Timeout(5)
     void allowsWhenVendorActionHearingGetDraftResultAndGroupIsLa() {
-        final DroolsAuthzEngine engine = new DroolsAuthzEngine(rules);
+        final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
         final AuthzPrincipal principal =
                 new AuthzPrincipal(USER_ID, "fn", "ln", "u3@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {

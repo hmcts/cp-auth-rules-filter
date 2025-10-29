@@ -41,3 +41,20 @@ gradle publishToMavenLocal
 jar tvf ./build/libs/cp-springboot-auth-rules-0.0.999.jar
 cat build/publications/mavenJava/module.json
 ```
+
+## Implementation notes
+Some changes to previous implementation
+1) It is on by default, if you dont need to use it then dont bring it in to your application
+   It can be turned off ( maybe for some integration tests ) by setting
+``` application.yml
+auth:
+    rules:
+          disabled: true
+```
+
+2) It expects drools rules files with an extension of ".drl" to be under a resource folder of "drools" which are loaded on startup
+   If no drools rules files are found, the application will fail to start
+   To prevent drools warning such as
+
+
+## Drools Auth Filter - How does it work ?
