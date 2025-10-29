@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProviderImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

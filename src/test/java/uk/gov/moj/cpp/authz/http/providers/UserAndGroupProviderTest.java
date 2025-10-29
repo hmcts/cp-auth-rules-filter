@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.authz.http.providers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.gov.moj.cpp.authz.drools.AuthAction;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProviderImpl;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
 
 import java.util.Map;

@@ -10,7 +10,7 @@ import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.stereotype.Component;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

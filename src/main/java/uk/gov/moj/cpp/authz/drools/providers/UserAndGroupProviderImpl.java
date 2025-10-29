@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.authz.http.providers;
+package uk.gov.moj.cpp.authz.drools.providers;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.moj.cpp.authz.drools.AuthAction;

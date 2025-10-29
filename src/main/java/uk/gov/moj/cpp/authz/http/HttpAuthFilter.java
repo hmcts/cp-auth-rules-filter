@@ -14,7 +14,7 @@ import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProviderImpl;
 
 import java.io.IOException;
 import java.util.HashMap;

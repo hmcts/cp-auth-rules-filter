@@ -7,7 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import uk.gov.moj.cpp.authz.drools.service.DroolsRulesFileService;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.authz.testsupport.TestConstants;
 
 import java.util.List;
