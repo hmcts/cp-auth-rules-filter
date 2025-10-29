@@ -22,7 +22,7 @@ public final class DroolsAuthEngine {
 
     private List<RuleAsset> ruleAssets;
 
-    public boolean evaluate(final UserAndGroupProvider userAndGroupProvider, final Action action) {
+    public boolean evaluate(final AuthAction authAction, final UserAndGroupProvider userAndGroupProvider) {
         try {
             if (ruleAssets == null || ruleAssets.isEmpty()) {
                 throw new RuntimeException("No drools rules loaded");
@@ -41,7 +41,7 @@ public final class DroolsAuthEngine {
                     final Outcome outcome = new Outcome();
                     kieSession.setGlobal("userAndGroupProvider", userAndGroupProvider);
                     kieSession.insert(outcome);
-                    kieSession.insert(action);
+                    kieSession.insert(authAction);
                     kieSession.fireAllRules();
                     log.info("Drools outcome {}", outcome.isSuccess());
                     return outcome.isSuccess();

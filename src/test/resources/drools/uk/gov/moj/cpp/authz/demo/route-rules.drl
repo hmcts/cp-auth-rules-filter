@@ -1,0 +1,27 @@
+package uk.gov.moj.cpp.authz.demo;
+
+import uk.gov.moj.cpp.authz.drools.Outcome;
+import uk.gov.moj.cpp.authz.drools.AuthAction;
+
+global uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider userAndGroupProvider;
+
+// --- Route-based actions ---
+
+rule "Allow GET /api/hello for LA or PA"
+when
+  $o: Outcome()
+  $a: AuthAction(name == "GET /api/hello")
+  eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($a, "Legal Advisers", "Prosecuting Authority Access"))
+then
+  $o.setSuccess(true);
+end
+
+rule "Allow POST /api/echo for LA"
+when
+  $o: Outcome()
+  $a: AuthAction(name == "POST /api/echo")
+  eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($a, "Legal Advisers"))
+then
+  $o.setSuccess(true);
+end
+

@@ -6,11 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-//         final String actionJson = "\"name\":\"GET /api/hello\",\"attributes\":{\"method\":\"GET\",\"path\":\"/api/hello\"}}";
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class Action {
+public class AuthAction {
     private String name;
     private Map<String, Object> attributes;
 }

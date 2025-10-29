@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import uk.gov.moj.cpp.authz.drools.Action;
+import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
@@ -163,8 +163,8 @@ class HttpAuthFilterTest {
         final IdentityResponse identityResponse = mockIdentity(USER_ID);
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);
@@ -182,8 +182,8 @@ class HttpAuthFilterTest {
         final IdentityResponse identityResponse = mockIdentity(USER_ID);
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);
@@ -201,8 +201,8 @@ class HttpAuthFilterTest {
         final IdentityResponse identityResponse = mockIdentity(USER_ID);
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);
@@ -219,8 +219,8 @@ class HttpAuthFilterTest {
         final IdentityResponse identityResponse = mockIdentity(USER_ID);
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);
@@ -237,8 +237,8 @@ class HttpAuthFilterTest {
         final IdentityResponse identityResponse = mockIdentity(USER_ID);
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);
@@ -273,8 +273,8 @@ class HttpAuthFilterTest {
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
 
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);
@@ -295,8 +295,8 @@ class HttpAuthFilterTest {
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
 
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthEngine.evaluate(any(), captor.capture())).thenReturn(true);
+        final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
+        when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
         HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
         authzFilter.doFilter(req, res, filterChain);

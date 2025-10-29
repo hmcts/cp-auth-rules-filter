@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UrlPathHelper;
-import uk.gov.moj.cpp.authz.drools.Action;
+import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
@@ -79,10 +79,10 @@ public final class HttpAuthFilter implements Filter {
         attributes.put("method", request.getMethod());
         attributes.put("path", pathWithinApplication);
 
-        final Action action = new Action(resolvedAction.getActionName(), attributes);
+        final AuthAction authAction = new AuthAction(resolvedAction.getActionName(), attributes);
         final UserAndGroupProviderImpl perRequestProvider = new UserAndGroupProviderImpl(principal);
         log.info("Running drools evaluate");
-        return droolsAuthEngine.evaluate(perRequestProvider, action);
+        return droolsAuthEngine.evaluate(authAction, perRequestProvider);
     }
 
     public Optional<UUID> validateUserId(final String userId) {

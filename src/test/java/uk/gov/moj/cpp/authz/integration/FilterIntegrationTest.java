@@ -23,8 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
         properties = {
-                "auth.rules.identityUrlPath=/testidentity/logged-in-user/permissions",
-                "auth.rules.excludePathPrefixes=/testidentity"})
+                "auth.rules.identityUrlPath=/usersgroups-query-api/{userId}/permissions",
+                "auth.rules.excludePathPrefixes=/usersgroups-query-api"})
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 class FilterIntegrationTest {
@@ -52,17 +52,16 @@ class FilterIntegrationTest {
         assertThat(result.getResponse().getStatus()).isEqualTo(403);
     }
 
-//    @Test
-//    void hello_endpoint_should_be_authorised() throws Exception {
-//        UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
-//        final String actionHeader = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
-//        mockMvc
-//                .perform(
-//                        get("/api/hello")
-//                                .header(headerProperties.getActionHeaderName(), actionHeader)
-//                                .header(headerProperties.getUserIdHeaderName(), userId))
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(content().string("Hello"));
-//    }
+    @Test
+    void hello_endpoint_with_no_action_should_be_authorised() throws Exception {
+        UUID userId = UUID.fromString("b066839e-30bd-42d9-8101-38cf039d673f");
+        MvcResult result = mockMvc
+                .perform(
+                        get("/api/hello")
+                                .header(headerProperties.getUserIdHeaderName(), userId))
+                .andDo(print())
+                .andReturn();
+        assertThat(result.getResponse().getStatus()).isEqualTo(200);
+        assertThat(result.getResponse().getContentAsString()).isEqualTo("Hello");
+    }
 }

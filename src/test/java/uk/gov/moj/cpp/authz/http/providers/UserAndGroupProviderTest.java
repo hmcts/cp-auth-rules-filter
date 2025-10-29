@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.authz.http.providers;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import uk.gov.moj.cpp.authz.drools.Action;
+import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
 
 import java.util.Map;
@@ -17,9 +17,9 @@ class UserAndGroupProviderTest {
     void returnsTrueWhenPrincipalHasAnyOfTheGroups() {
         final AuthzPrincipal principal = new AuthzPrincipal(userId, "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"));
         final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(principal);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final AuthAction authAction = new AuthAction("GET /api/hello", Map.of());
 
-        final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action,
+        final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(authAction,
                 "Prosecuting Authority Access", "Legal Advisers");
 
         Assertions.assertTrue(result, "Expected match when principal has one of the groups");
@@ -30,9 +30,9 @@ class UserAndGroupProviderTest {
         final AuthzPrincipal principal = new AuthzPrincipal(
                 userId, "fn", "ln", "u2@example.test", Set.of("Guests"));
         final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(principal);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final AuthAction authAction = new AuthAction("GET /api/hello", Map.of());
 
-        final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action,
+        final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(authAction,
                 "Legal Advisers", "Prosecuting Authority Access");
 
         Assertions.assertFalse(result, "Expected no match when principal lacks groups");
@@ -41,9 +41,9 @@ class UserAndGroupProviderTest {
     @Test
     void returnsFalseWhenPrincipalIsNull() {
         final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(null);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final AuthAction authAction = new AuthAction("GET /api/hello", Map.of());
 
-        final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action, "Anything");
+        final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(authAction, "Anything");
 
         Assertions.assertFalse(result, "Expected false when principal is null");
     }
