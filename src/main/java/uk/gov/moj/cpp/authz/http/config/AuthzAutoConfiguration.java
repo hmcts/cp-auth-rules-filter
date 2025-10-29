@@ -23,7 +23,7 @@ public class AuthzAutoConfiguration {
 
     private final HttpAuthzPathProperties pathProperties;
     private final HttpAuthzHeaderProperties headerProperties;
-    private final DroolsProperties droolsProperties;
+
 
     @Bean
     public FilterRegistrationBean<HttpAuthzFilter> httpAuthzFilterRegistration(
@@ -48,6 +48,5 @@ public class AuthzAutoConfiguration {
         final ObjectMapper mapper = new ObjectMapper();
         log.info("AuthRulesFilter pathProperties -> {}", mapper.writeValueAsString(pathProperties));
         log.info("AuthRulesFilter headerProperties  -> {}", mapper.writeValueAsString(headerProperties));
-        log.info("AuthRulesFilter droolsProperties -> {}", mapper.writeValueAsString(droolsProperties));
     }
 }

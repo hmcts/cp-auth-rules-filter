@@ -92,3 +92,9 @@ dependencies {
   api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
   api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
 }
+
+pmd {
+  ruleSets = []
+  ruleSetFiles = files(".github/pmd-ruleset.xml")
+  ignoreFailures = false
+}

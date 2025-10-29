@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-class RequestUserAndGroupProviderTest {
+class UserAndGroupProviderTest {
 
     UUID userId = UUID.randomUUID();
 
     @Test
     void returnsTrueWhenPrincipalHasAnyOfTheGroups() {
         final AuthzPrincipal principal = new AuthzPrincipal(userId, "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"));
-        final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal);
+        final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(principal);
         final Action action = new Action("GET /api/hello", Map.of());
 
         final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action,
@@ -29,7 +29,7 @@ class RequestUserAndGroupProviderTest {
     void returnsFalseWhenPrincipalLacksGroups() {
         final AuthzPrincipal principal = new AuthzPrincipal(
                 userId, "fn", "ln", "u2@example.test", Set.of("Guests"));
-        final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal);
+        final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(principal);
         final Action action = new Action("GET /api/hello", Map.of());
 
         final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action,
@@ -40,7 +40,7 @@ class RequestUserAndGroupProviderTest {
 
     @Test
     void returnsFalseWhenPrincipalIsNull() {
-        final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(null);
+        final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(null);
         final Action action = new Action("GET /api/hello", Map.of());
 
         final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action, "Anything");

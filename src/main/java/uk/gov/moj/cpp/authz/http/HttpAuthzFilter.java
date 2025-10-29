@@ -14,7 +14,7 @@ import uk.gov.moj.cpp.authz.drools.Action;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthzHeaderProperties;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthzPathProperties;
-import uk.gov.moj.cpp.authz.http.providers.RequestUserAndGroupProvider;
+import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -78,8 +78,8 @@ public final class HttpAuthzFilter implements Filter {
         attributes.put("path", pathWithinApplication);
 
         final Action action = new Action(resolvedAction.getActionName(), attributes);
-        final RequestUserAndGroupProvider perRequestProvider = new RequestUserAndGroupProvider(principal);
-
+        final UserAndGroupProviderImpl perRequestProvider = new UserAndGroupProviderImpl(principal);
+        log.info("Running drools evaluate");
         return droolsAuthzEngine.evaluate(perRequestProvider, action);
     }
 

@@ -34,13 +34,20 @@ public final class IdentityClient {
         this.restTemplate = new RestTemplate(factory);
     }
 
+    /**
+     * PMD LooseCoupling warning on HttpHeaders ... how can we fix this ?
+     * MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+     * RequestEntity.get(url).headers((HttpHeaders) httpHeaders)
+     * ... then get warned to use HttpHeaders to avoid the cast :)
+     */
+    @SuppressWarnings("PMD.LooseCoupling")
     public IdentityResponse fetchIdentity(final UUID userId) {
         final String urlPath = pathProperties.getIdentityUrlPath().replace("{userId}", userId.toString());
         final URI url = constructUrl(pathProperties.getIdentityUrlRoot(), urlPath);
-        final HttpHeaders headers = new HttpHeaders();
-        headers.add("Accept", headerProperties.getAcceptHeader());
-        headers.add(headerProperties.getUserIdHeaderName(), userId.toString());
-        final RequestEntity<Void> request = RequestEntity.get(url).headers(headers).build();
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Accept", headerProperties.getAcceptHeader());
+        httpHeaders.add(headerProperties.getUserIdHeaderName(), userId.toString());
+        final RequestEntity<Void> request = RequestEntity.get(url).headers(httpHeaders).build();
         try {
             final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
             if (response == null || response.getBody() == null) {

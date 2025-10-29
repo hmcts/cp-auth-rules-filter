@@ -169,7 +169,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(ACTION_GET_HELLO, captor.getValue().name(), "Action name should match header");
+        assertEquals(ACTION_GET_HELLO, captor.getValue().getName(), "Action name should match header");
     }
 
     @Test
@@ -188,7 +188,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(METHOD_GET, captor.getValue().attributes().get("method"), "Method attribute should be GET");
+        assertEquals(METHOD_GET, captor.getValue().getAttributes().get("method"), "Method attribute should be GET");
     }
 
     @Test
@@ -207,7 +207,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(PATH_HELLO, captor.getValue().attributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/hello");
+        assertEquals(PATH_HELLO, captor.getValue().getAttributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/hello");
     }
 
     @Test
@@ -225,7 +225,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(METHOD_POST, captor.getValue().attributes().get("method"), "Method attribute should be POST");
+        assertEquals(METHOD_POST, captor.getValue().getAttributes().get("method"), "Method attribute should be POST");
     }
 
     @Test
@@ -243,7 +243,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(PATH_ECHO, captor.getValue().attributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/echo");
+        assertEquals(PATH_ECHO, captor.getValue().getAttributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/echo");
     }
 
     @Test
@@ -278,7 +278,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals("sjp.delete-financial-means", captor.getValue().name(),
+        assertEquals("sjp.delete-financial-means", captor.getValue().getName(),
                 "Vendor token from Content-Type must take priority");
     }
 
@@ -300,7 +300,7 @@ class HttpAuthzFilterTest {
 
         authzFilter.doFilter(req, res, filterChain);
 
-        assertEquals("hearing.get-draft-result", captor.getValue().name(),
+        assertEquals("hearing.get-draft-result", captor.getValue().getName(),
                 "Vendor token from Accept must be used when Content-Type is absent");
     }
 
