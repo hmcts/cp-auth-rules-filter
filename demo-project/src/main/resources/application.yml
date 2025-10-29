@@ -1,0 +1,9 @@
+server:
+  port: 8090
+
+auth:
+  rules:
+    identityUrlRoot: "http://localhost:8090"
+    identityUrlPath: "/usersgroups-query-api/query/api/rest/usersgroups/users/{userId}/permissions"
+    excludePathPrefixes: "/usersgroups-query-api/,/actuator,/error"
+    acceptHeader: "application/vnd.usersgroups.get-logged-in-user-permissions+json"
