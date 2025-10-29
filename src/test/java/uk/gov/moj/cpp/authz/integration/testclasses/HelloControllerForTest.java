@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @Slf4j
-public class DummyHelloController {
+public class HelloControllerForTest {
 
     @GetMapping("/api/hello")
     public ResponseEntity<String> helloEndpoint() {

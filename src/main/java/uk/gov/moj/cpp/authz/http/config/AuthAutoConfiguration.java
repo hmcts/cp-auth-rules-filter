@@ -8,8 +8,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
-import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
+import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
+import uk.gov.moj.cpp.authz.http.HttpAuthFilter;
 import uk.gov.moj.cpp.authz.http.IdentityClient;
 import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
 import uk.gov.moj.cpp.authz.http.RequestActionResolver;
@@ -17,26 +17,26 @@ import uk.gov.moj.cpp.authz.http.RequestActionResolver;
 @Configuration
 @AllArgsConstructor
 @Slf4j
-public class AuthzAutoConfiguration {
+public class AuthAutoConfiguration {
 
     private static final int AUTH_FILTER_PRIORITY = Ordered.HIGHEST_PRECEDENCE + 30;
 
-    private final HttpAuthzPathProperties pathProperties;
-    private final HttpAuthzHeaderProperties headerProperties;
+    private final HttpAuthPathProperties pathProperties;
+    private final HttpAuthHeaderProperties headerProperties;
 
 
     @Bean
-    public FilterRegistrationBean<HttpAuthzFilter> httpAuthzFilterRegistration(
-            final HttpAuthzPathProperties pathProperties,
-            final HttpAuthzHeaderProperties headerProperties,
+    public FilterRegistrationBean<HttpAuthFilter> httpAuthzFilterRegistration(
+            final HttpAuthPathProperties pathProperties,
+            final HttpAuthHeaderProperties headerProperties,
             final RequestActionResolver actionResolver,
             final IdentityClient identityClient,
             final IdentityToGroupsMapper identityToGroupsMapper,
-            final DroolsAuthzEngine droolsAuthzEngine) {
+            final DroolsAuthEngine droolsAuthEngine) {
         logProperties();
-        final HttpAuthzFilter filter =
-                new HttpAuthzFilter(pathProperties, headerProperties, actionResolver, identityClient, identityToGroupsMapper, droolsAuthzEngine);
-        final FilterRegistrationBean<HttpAuthzFilter> registration = new FilterRegistrationBean<>(filter);
+        final HttpAuthFilter filter =
+                new HttpAuthFilter(pathProperties, headerProperties, actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        final FilterRegistrationBean<HttpAuthFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setOrder(AUTH_FILTER_PRIORITY);
         registration.addUrlPatterns("/*");
         registration.setName("cppHttpAuthzFilter");

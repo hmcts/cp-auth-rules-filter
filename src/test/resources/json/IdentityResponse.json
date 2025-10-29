@@ -1,0 +1,16 @@
+{
+    "userId": "dfef853f-fd2e-488f-8b57-7bc115043cf3",
+    "groups": [
+        {
+            "groupId": "63cae459-0e51-4d60-bcf8-c5324be50ba4",
+            "groupName": "Legal Advisers",
+            "prosecutingAuthority": "ALL"
+        },
+        {
+            "groupId": "53292fc8-d164-4a6c-8722-cdbc795cf83a",
+            "groupName": "Court Administrators",
+            "prosecutingAuthority": "ALL"
+        }
+    ],
+    "permissions": []
+}

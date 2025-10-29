@@ -10,10 +10,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UrlPathHelper;
-import uk.gov.moj.cpp.authz.drools.Action;
-import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzHeaderProperties;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzPathProperties;
+import uk.gov.moj.cpp.authz.drools.AuthAction;
+import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
 import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
 
 import java.io.IOException;
@@ -25,24 +25,26 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Slf4j
-public final class HttpAuthzFilter implements Filter {
+public final class HttpAuthFilter implements Filter {
 
-    private final HttpAuthzPathProperties pathProperties;
-    private final HttpAuthzHeaderProperties headerProperties;
+    private final HttpAuthPathProperties pathProperties;
+    private final HttpAuthHeaderProperties headerProperties;
     private final RequestActionResolver actionResolver;
     private final IdentityClient identityClient;
     private final IdentityToGroupsMapper identityToGroupsMapper;
-    private final DroolsAuthzEngine droolsAuthzEngine;
+    private final DroolsAuthEngine droolsAuthEngine;
 
     @Override
     public void doFilter(final ServletRequest request,
                          final ServletResponse response,
                          final FilterChain filterChain) throws IOException, ServletException {
-
         final HttpServletRequest httpRequest = (HttpServletRequest) request;
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(httpRequest);
-        if (pathProperties.getExcludePathPrefixes().stream().anyMatch(pathWithinApplication::startsWith)) {
+        if (pathProperties.getDisabled()) {
+            log.warn("AuthFilter is disabled");
+            filterChain.doFilter(request, response);
+        } else if (pathProperties.getExcludePathPrefixes().stream().anyMatch(pathWithinApplication::startsWith)) {
             log.info("AuthFilter skipping excluded path");
             filterChain.doFilter(request, response);
         } else {
@@ -77,10 +79,10 @@ public final class HttpAuthzFilter implements Filter {
         attributes.put("method", request.getMethod());
         attributes.put("path", pathWithinApplication);
 
-        final Action action = new Action(resolvedAction.getActionName(), attributes);
+        final AuthAction authAction = new AuthAction(resolvedAction.getActionName(), attributes);
         final UserAndGroupProviderImpl perRequestProvider = new UserAndGroupProviderImpl(principal);
         log.info("Running drools evaluate");
-        return droolsAuthzEngine.evaluate(perRequestProvider, action);
+        return droolsAuthEngine.evaluate(authAction, perRequestProvider);
     }
 
     public Optional<UUID> validateUserId(final String userId) {

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class RequestActionResolverTest {
+class RequestAuthActionResolverTest {
 
     private static final String MEDIA_SJP_DELETE_FINANCIAL_MEANS =
             "application/vnd.sjp.delete-financial-means+json";
