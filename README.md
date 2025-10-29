@@ -42,6 +42,10 @@ jar tvf ./build/libs/cp-auth-rules-filter-0.0.999.jar
 cat build/publications/mavenJava/module.json
 ```
 
+## Demo Project
+To test the filter process using the published jarfile see child project "demo-project"
+
+
 ## Implementation notes
 Some changes to previous implementation
 1) The rules filter is on by default
