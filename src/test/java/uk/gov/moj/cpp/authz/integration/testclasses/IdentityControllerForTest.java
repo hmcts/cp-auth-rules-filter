@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
+import uk.gov.moj.cpp.authz.http.dto.UserGroup;
 
 import java.util.List;
 
@@ -16,29 +18,16 @@ import static uk.gov.moj.cpp.authz.testsupport.TestConstants.USER_LA_1;
 @RestController
 @AllArgsConstructor
 @Slf4j
-public class DummyIdentifyController {
+public class IdentityControllerForTest {
 
     private static final String ACCESS_ALL = "ALL";
-
-    public record UserGroup(String groupId, String groupName, String prosecutingAuthority) {
-    }
-
-    public record SwitchableRole(String roleId, String roleName) {
-    }
-
-    public record UserPermission(String permissionId, String object, String action, String description) {
-    }
-
-    public record LoggedInUserPermissionsResponse(
-            List<UserGroup> groups, List<SwitchableRole> switchableRoles, List<UserPermission> permissions) {
-    }
 
     @GetMapping(
             value = "/usersgroups-query-api/{userId}/permissions",
             produces = "application/vnd.usersgroups.get-logged-in-user-permissions+json")
     public ResponseEntity<LoggedInUserPermissionsResponse> getPermissions(
             @PathVariable("userId") final String userId) {
-        log.info("DummyIdentityController received permissions request for userId:{}", userId);
+        log.info("IdentityControllerForTest received permissions request ");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/vnd.usersgroups.get-logged-in-user-permissions+json"))
                 .body(responseForUser(userId));
