@@ -1,33 +1,39 @@
-package uk.gov.hmcts.controllers;
+package uk.gov.moj.cpp.auth.integration.testclasses;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.moj.cpp.auth.http.dto.LoggedInUserPermissionsResponse;
 import uk.gov.moj.cpp.auth.http.dto.UserGroup;
 
 import java.util.List;
 
+import static uk.gov.moj.cpp.auth.testsupport.TestConstants.DA_USER_1;
+import static uk.gov.moj.cpp.auth.testsupport.TestConstants.USER_LA_1;
+
 @RestController
-public class IdentityControllerForDemo {
-    private static final String USER_LA_1 = "b066839e-30bd-42d9-8101-38cf039d673f";
+@AllArgsConstructor
+@Slf4j
+public class IdentityControllerForTest {
+
     private static final String ACCESS_ALL = "ALL";
-    private static final String DA_USER_1 = "d6eab103-fceb-4dd7-bc31-ef096dc12dee";
 
     @GetMapping(
-            value = "/usersgroups-query-api/query/api/rest/usersgroups/users/{userId}/permissions",
+            value = "/usersgroups-query-api/{userId}/permissions",
             produces = "application/vnd.usersgroups.get-logged-in-user-permissions+json")
     public ResponseEntity<LoggedInUserPermissionsResponse> getPermissions(
             @PathVariable("userId") final String userId) {
+        log.info("IdentityControllerForTest received permissions request ");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/vnd.usersgroups.get-logged-in-user-permissions+json"))
-                .body(sampleFor(userId));
+                .body(responseForUser(userId));
     }
 
-    private LoggedInUserPermissionsResponse sampleFor(final String userId) {
+    private LoggedInUserPermissionsResponse responseForUser(final String userId) {
         final LoggedInUserPermissionsResponse response;
         if (USER_LA_1.equalsIgnoreCase(userId)) {
             final List<UserGroup> groups = List.of(

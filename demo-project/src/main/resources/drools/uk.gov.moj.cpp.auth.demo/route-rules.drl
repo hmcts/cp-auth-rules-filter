@@ -1,9 +1,9 @@
-package uk.gov.moj.cpp.authz.demo;
+package uk.gov.moj.cpp.auth.demo;
 
-import uk.gov.moj.cpp.authz.drools.Outcome;
-import uk.gov.moj.cpp.authz.drools.AuthAction;
+import uk.gov.moj.cpp.auth.drools.Outcome;
+import uk.gov.moj.cpp.auth.drools.AuthAction;
 
-global uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider userAndGroupProvider;
+global uk.gov.moj.cpp.auth.drools.providers.UserAndGroupProvider userAndGroupProvider;
 
 // --- Route-based actions ---
 

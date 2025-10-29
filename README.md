@@ -58,7 +58,7 @@ Some changes to previous implementation
 ```
 KieBuilderImpl    : File '/Projects/cp-auth-rules-filter/build/resources/test/drools/route-rules.drl' 
 is in folder '/Users/colingreenwood/IdeaProjects/cp-auth-rules-filter/build/resources/test/drools' 
-but declares package 'uk.gov.moj.cpp.authz.demo'. 
+but declares package 'uk.gov.moj.cpp.auth.demo'. 
 It is recommended to have a correspondance between package and folder names
 ```
 
@@ -83,7 +83,7 @@ i.e. See  [IdentityResponse.json](./src/test/resources/json/IdentityResponse.jso
 Then we construct a AuthPrincipal with userId and groups
 
 We add AuthPrincipal classname onto the HttpRequest ( why ? )
-i.e. httpRequest.setAttribute(AuthzPrincipal.class.getName(), principal);
+i.e. httpRequest.setAttribute(AuthPrincipal.class.getName(), principal);
 
 We create a new AuthAction with the url and attributes of the url rest method and path
 i.e. See  [AuthAction.json](./src/test/resources/json/AuthAction.json)
