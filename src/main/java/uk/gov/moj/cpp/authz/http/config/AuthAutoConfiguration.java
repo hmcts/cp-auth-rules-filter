@@ -26,7 +26,7 @@ public class AuthAutoConfiguration {
 
 
     @Bean
-    public FilterRegistrationBean<HttpAuthFilter> httpAuthzFilterRegistration(
+    public FilterRegistrationBean<HttpAuthFilter> httpAuthFilterRegistration(
             final HttpAuthPathProperties pathProperties,
             final HttpAuthHeaderProperties headerProperties,
             final RequestActionResolver actionResolver,
@@ -39,7 +39,7 @@ public class AuthAutoConfiguration {
         final FilterRegistrationBean<HttpAuthFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setOrder(AUTH_FILTER_PRIORITY);
         registration.addUrlPatterns("/*");
-        registration.setName("cppHttpAuthzFilter");
+        registration.setName("cppHttpAuthFilter");
         return registration;
     }
 

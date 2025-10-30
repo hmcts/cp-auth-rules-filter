@@ -67,8 +67,8 @@ class HttpAuthFilterTest {
     void forwardsRequestUnchangedWhenPathIsExcluded() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_EXCLUDED);
         final MockHttpServletResponse res = new MockHttpServletResponse();
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
-        authzFilter.doFilter(req, res, filterChain);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        authFilter.doFilter(req, res, filterChain);
 
         verify(filterChain, times(1)).doFilter(req, res);
     }
@@ -77,9 +77,9 @@ class HttpAuthFilterTest {
     void returns401WhenUserIdHeaderIsMissing() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
         final MockHttpServletResponse res = new MockHttpServletResponse();
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(401, res.getStatus(), "Expected 401 when user id header is missing");
     }
@@ -91,9 +91,9 @@ class HttpAuthFilterTest {
         final MockHttpServletResponse res = new MockHttpServletResponse();
         ResolvedAction resolvedAction = new ResolvedAction("Name", false, false);
         when(actionResolver.resolve(req, actionTrueHeader().getActionHeaderName(), PATH_HELLO)).thenReturn(resolvedAction);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionTrueHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionTrueHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(400, res.getStatus(), "Expected 400 when action header is required but missing");
     }
@@ -109,9 +109,9 @@ class HttpAuthFilterTest {
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         mockHelloResolvedAction(req, ACTION_HEADER_NAME, false, false);
         when(droolsAuthEngine.evaluate(any(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(200, res.getStatus(), "Expected 200 when engine approves");
     }
@@ -126,11 +126,11 @@ class HttpAuthFilterTest {
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         when(droolsAuthEngine.evaluate(any(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
-        final Object principalAttr = req.getAttribute(AuthzPrincipal.class.getName());
+        final Object principalAttr = req.getAttribute(AuthPrincipal.class.getName());
         assertNotNull(principalAttr, "Principal should be attached to the request");
     }
 
@@ -145,9 +145,9 @@ class HttpAuthFilterTest {
         when(identityClient.fetchIdentity(USER_ID)).thenReturn(identityResponse);
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of("Guests"));
         when(droolsAuthEngine.evaluate(any(), any())).thenReturn(false);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(403, res.getStatus(), "Expected 403 when engine rejects");
     }
@@ -165,9 +165,9 @@ class HttpAuthFilterTest {
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(ACTION_GET_HELLO, captor.getValue().getName(), "Action name should match header");
     }
@@ -184,9 +184,9 @@ class HttpAuthFilterTest {
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(METHOD_GET, captor.getValue().getAttributes().get("method"), "Method attribute should be GET");
     }
@@ -203,9 +203,9 @@ class HttpAuthFilterTest {
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(PATH_HELLO, captor.getValue().getAttributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/hello");
     }
@@ -221,9 +221,9 @@ class HttpAuthFilterTest {
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(METHOD_POST, captor.getValue().getAttributes().get("method"), "Method attribute should be POST");
     }
@@ -239,9 +239,9 @@ class HttpAuthFilterTest {
         when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals(PATH_ECHO, captor.getValue().getAttributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/echo");
     }
@@ -253,9 +253,9 @@ class HttpAuthFilterTest {
                 List.of("/health/", "/metrics/", "/usersgroups-query-api/"));
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_EXCLUDED_METRICS);
         final MockHttpServletResponse res = new MockHttpServletResponse();
-        HttpAuthFilter authzFilter = new HttpAuthFilter(pathProperties, actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(pathProperties, actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         verify(filterChain, times(1)).doFilter(req, res);
     }
@@ -275,9 +275,9 @@ class HttpAuthFilterTest {
 
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals("sjp.delete-financial-means", captor.getValue().getName(),
                 "Vendor token from Content-Type must take priority");
@@ -297,9 +297,9 @@ class HttpAuthFilterTest {
 
         final ArgumentCaptor<AuthAction> captor = ArgumentCaptor.forClass(AuthAction.class);
         when(droolsAuthEngine.evaluate(captor.capture(), any())).thenReturn(true);
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
 
-        authzFilter.doFilter(req, res, filterChain);
+        authFilter.doFilter(req, res, filterChain);
 
         assertEquals("hearing.get-draft-result", captor.getValue().getName(),
                 "Vendor token from Accept must be used when Content-Type is absent");
@@ -307,21 +307,21 @@ class HttpAuthFilterTest {
 
     @Test
     void validate_userid_should_reject_none_guid() {
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
-        assertThat(authzFilter.validateUserId(null)).isEmpty();
-        assertThat(authzFilter.validateUserId("")).isEmpty();
-        assertThat(authzFilter.validateUserId("bad")).isEmpty();
-        assertThat(authzFilter.validateUserId("a05078bd")).isEmpty();
-        assertThat(authzFilter.validateUserId("a05078bd-b189-4fd9-8c6e")).isEmpty();
-        assertThat(authzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a1234567")).isEmpty();
-        assertThat(authzFilter.validateUserId(USER_ID + "0")).isEmpty();
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        assertThat(authFilter.validateUserId(null)).isEmpty();
+        assertThat(authFilter.validateUserId("")).isEmpty();
+        assertThat(authFilter.validateUserId("bad")).isEmpty();
+        assertThat(authFilter.validateUserId("a05078bd")).isEmpty();
+        assertThat(authFilter.validateUserId("a05078bd-b189-4fd9-8c6e")).isEmpty();
+        assertThat(authFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a1234567")).isEmpty();
+        assertThat(authFilter.validateUserId(USER_ID + "0")).isEmpty();
     }
 
     @Test
     void validate_userid_should_return_good_guid() {
-        HttpAuthFilter authzFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
-        assertThat(authzFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a123456").get()).isEqualTo(USER_ID);
-        assertThat(authzFilter.validateUserId("E3F58BF7-FB59-4E5C-8ED9-E6A0F5966743").get()).isEqualTo(USER_ID_UC);
+        HttpAuthFilter authFilter = new HttpAuthFilter(defaultPaths(), actionFalseHeader(), actionResolver, identityClient, identityToGroupsMapper, droolsAuthEngine);
+        assertThat(authFilter.validateUserId("a05078bd-b189-4fd9-8c6e-181e9a123456").get()).isEqualTo(USER_ID);
+        assertThat(authFilter.validateUserId("E3F58BF7-FB59-4E5C-8ED9-E6A0F5966743").get()).isEqualTo(USER_ID_UC);
     }
 
     private IdentityResponse mockIdentity(final UUID userId) {

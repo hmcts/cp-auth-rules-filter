@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.authz.demo;
 import uk.gov.moj.cpp.authz.drools.Outcome;
 import uk.gov.moj.cpp.authz.drools.AuthAction;
 
-global uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider userAndGroupProvider;
+global uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProvider userAndGroupProvider;
 
 // --- Vendor-style actions resolved from Content-Type / Accept ---
 

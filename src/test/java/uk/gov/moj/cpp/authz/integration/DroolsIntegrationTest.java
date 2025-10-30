@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
-import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
+import uk.gov.moj.cpp.authz.http.AuthPrincipal;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProviderImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +27,10 @@ class DroolsIntegrationTest {
         final String actionJson = "{\"name\":\"GET /api/hello\",\"attributes\":{\"method\":\"GET\",\"path\":\"/api/hello\"}}";
         final AuthAction authAction = objectMapper.readValue(actionJson, AuthAction.class);
 
-        final String authzPrincipalJson = "{\"userId\":\"ed00e4e3-edda-489a-a41a-86b02e66f412\",\"firstName\":null,\"lastName\":null,\"email\":null,\"groups\":[\"Legal Advisers\",\"Prosecuting Authority Access\",\"Court Administrators\"]}";
-        AuthzPrincipal authzPrincipal = objectMapper.readValue(authzPrincipalJson, AuthzPrincipal.class);
+        final String authPrincipalJson = "{\"userId\":\"ed00e4e3-edda-489a-a41a-86b02e66f412\",\"firstName\":null,\"lastName\":null,\"email\":null,\"groups\":[\"Legal Advisers\",\"Prosecuting Authority Access\",\"Court Administrators\"]}";
+        AuthPrincipal authPrincipal = objectMapper.readValue(authPrincipalJson, AuthPrincipal.class);
 
-        UserAndGroupProviderImpl userAndGroupProvider = new UserAndGroupProviderImpl(authzPrincipal);
+        UserAndGroupProviderImpl userAndGroupProvider = new UserAndGroupProviderImpl(authPrincipal);
         log.info("Running drools evaluate");
         boolean response = droolsAuthEngine.evaluate(authAction, userAndGroupProvider);
         assertThat(response).isTrue();

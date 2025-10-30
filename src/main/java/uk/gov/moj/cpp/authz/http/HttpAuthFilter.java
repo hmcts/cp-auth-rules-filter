@@ -14,7 +14,7 @@ import uk.gov.moj.cpp.authz.drools.AuthAction;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthEngine;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProviderImpl;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProviderImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,9 +71,9 @@ public final class HttpAuthFilter implements Filter {
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(request);
         final IdentityResponse identityResponse = identityClient.fetchIdentity(userId);
         final Set<String> groups = identityToGroupsMapper.toGroups(identityResponse);
-        final AuthzPrincipal principal =
-                new AuthzPrincipal(identityResponse.userId(), null, null, null, groups);
-        request.setAttribute(AuthzPrincipal.class.getName(), principal);
+        final AuthPrincipal principal =
+                new AuthPrincipal(identityResponse.userId(), null, null, null, groups);
+        request.setAttribute(AuthPrincipal.class.getName(), principal);
 
         final Map<String, Object> attributes = new HashMap<>();
         attributes.put("method", request.getMethod());

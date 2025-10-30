@@ -6,8 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import uk.gov.moj.cpp.authz.drools.service.DroolsRulesFileService;
-import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
-import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider;
+import uk.gov.moj.cpp.authz.http.AuthPrincipal;
+import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.authz.testsupport.TestConstants;
 
 import java.util.List;
@@ -30,8 +30,8 @@ class DroolsAuthEngineTest {
     void allowsWhenRuleMatchesActionAndGroup() {
         final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
 
-        final AuthzPrincipal principal =
-                new AuthzPrincipal(USER_ID, "fn", "ln", "u1@example.test", Set.of(TestConstants.GROUP_LA));
+        final AuthPrincipal principal =
+                new AuthPrincipal(USER_ID, "fn", "ln", "u1@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
             for (final String g : groups) {
                 if (principal.groups().stream().anyMatch(s -> s.equalsIgnoreCase(g))) {
@@ -58,8 +58,8 @@ class DroolsAuthEngineTest {
     @Timeout(5)
     void allowsWhenVendorActionSjpDeleteFinancialMeansAndGroupIsLa() {
         final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
-        final AuthzPrincipal principal =
-                new AuthzPrincipal(USER_ID, "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA));
+        final AuthPrincipal principal =
+                new AuthPrincipal(USER_ID, "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
             for (final String g : groups) {
                 if (principal.groups().stream().anyMatch(s -> s.equalsIgnoreCase(g))) {
@@ -77,8 +77,8 @@ class DroolsAuthEngineTest {
     @Timeout(5)
     void allowsWhenVendorActionHearingGetDraftResultAndGroupIsLa() {
         final DroolsAuthEngine engine = new DroolsAuthEngine(rules);
-        final AuthzPrincipal principal =
-                new AuthzPrincipal(USER_ID, "fn", "ln", "u3@example.test", Set.of(TestConstants.GROUP_LA));
+        final AuthPrincipal principal =
+                new AuthPrincipal(USER_ID, "fn", "ln", "u3@example.test", Set.of(TestConstants.GROUP_LA));
         final UserAndGroupProvider provider = (action, groups) -> {
             for (final String g : groups) {
                 if (principal.groups().stream().anyMatch(s -> s.equalsIgnoreCase(g))) {

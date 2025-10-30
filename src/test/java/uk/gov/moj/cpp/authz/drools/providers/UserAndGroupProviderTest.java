@@ -1,9 +1,9 @@
-package uk.gov.moj.cpp.authz.http.providers;
+package uk.gov.moj.cpp.authz.drools.providers;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import uk.gov.moj.cpp.authz.drools.AuthAction;
-import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
+import uk.gov.moj.cpp.authz.http.AuthPrincipal;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +15,7 @@ class UserAndGroupProviderTest {
 
     @Test
     void returnsTrueWhenPrincipalHasAnyOfTheGroups() {
-        final AuthzPrincipal principal = new AuthzPrincipal(userId, "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"));
+        final AuthPrincipal principal = new AuthPrincipal(userId, "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"));
         final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(principal);
         final AuthAction authAction = new AuthAction("GET /api/hello", Map.of());
 
@@ -27,7 +27,7 @@ class UserAndGroupProviderTest {
 
     @Test
     void returnsFalseWhenPrincipalLacksGroups() {
-        final AuthzPrincipal principal = new AuthzPrincipal(
+        final AuthPrincipal principal = new AuthPrincipal(
                 userId, "fn", "ln", "u2@example.test", Set.of("Guests"));
         final UserAndGroupProviderImpl provider = new UserAndGroupProviderImpl(principal);
         final AuthAction authAction = new AuthAction("GET /api/hello", Map.of());
