@@ -67,13 +67,13 @@ public final class HttpAuthFilter implements Filter {
             }
         }
     }
-    private String getHeaderIgnoreCase(HttpServletRequest httpServletRequest, String name) {
-        String header = httpServletRequest.getHeader(name);
+    private String getHeaderIgnoreCase(final HttpServletRequest httpServletRequest,final String name) {
+        final String header = httpServletRequest.getHeader(name);
         if (header != null) {
             return header;
         }
         for (Enumeration<String> e = httpServletRequest.getHeaderNames(); e.hasMoreElements();) {
-            String element = e.nextElement();
+            final String element = e.nextElement();
             if (element.equalsIgnoreCase(name)) {
                 return httpServletRequest.getHeader(element);
             }
