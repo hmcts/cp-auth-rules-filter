@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class HttpAuthFilterTest {
 
-    private static final String USER_ID_HEADER_NAME = "CJSCPPUID";
+    private static final String USER_ID_HEADER_NAME = "cjsCPPUID";
     private static final String ACTION_HEADER_NAME = "CPP-ACTION";
     private static final String METHOD_GET = "GET";
     private static final String METHOD_POST = "POST";
