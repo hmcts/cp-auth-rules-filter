@@ -17,6 +17,7 @@ import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
 import uk.gov.moj.cpp.authz.drools.providers.UserAndGroupProviderImpl;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public final class HttpAuthFilter implements Filter {
             filterChain.doFilter(request, response);
         } else {
             log.info("AuthFilter processing included path");
-            final Optional<UUID> userId = validateUserId(httpRequest.getHeader(headerProperties.getUserIdHeaderName()));
+            final Optional<UUID> userId = validateUserId(getHeaderIgnoreCase(httpRequest,headerProperties.getUserIdHeaderName()));
             if (userId.isEmpty()) {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing header: " + headerProperties.getUserIdHeaderName());
             } else {
@@ -66,7 +67,19 @@ public final class HttpAuthFilter implements Filter {
             }
         }
     }
-
+    private String getHeaderIgnoreCase(HttpServletRequest httpServletRequest, String name) {
+        String header = httpServletRequest.getHeader(name);
+        if (header != null) {
+            return header;
+        }
+        for (Enumeration<String> e = httpServletRequest.getHeaderNames(); e.hasMoreElements();) {
+            String element = e.nextElement();
+            if (element.equalsIgnoreCase(name)) {
+                return httpServletRequest.getHeader(element);
+            }
+        }
+        return null;
+    }
     private boolean validateIdentityRules(final UUID userId, final HttpServletRequest request, final ResolvedAction resolvedAction) {
         final String pathWithinApplication = new UrlPathHelper().getPathWithinApplication(request);
         final IdentityResponse identityResponse = identityClient.fetchIdentity(userId);
