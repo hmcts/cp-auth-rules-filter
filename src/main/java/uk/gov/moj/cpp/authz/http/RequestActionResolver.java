@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.authz.http;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
-
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Resolves an "action name" for authorization with the following priority:
@@ -14,16 +14,19 @@ import java.util.regex.Pattern;
  * 3) Explicit action header (e.g., CPP-ACTION)
  * 4) Computed: "<METHOD> <PATH>"
  */
-@Service
 public final class RequestActionResolver {
 
     private static final String ACCEPT = "Accept";
-    private static final Pattern VENDOR_TOKEN_PATTERN =
+    private static final Pattern VND_TOKEN_PATTERN =
             Pattern.compile("(?i)\\bapplication/vnd\\.([a-z0-9][a-z0-9._-]*)(?:\\+[^\\s;,]+)?\\b");
 
-    public ResolvedAction resolve(final HttpServletRequest request,
-                                  final String actionHeaderName,
-                                  final String pathWithinApplication) {
+    private RequestActionResolver() {
+        // utility
+    }
+
+    public static ResolvedAction resolve(final HttpServletRequest request,
+                                         final String actionHeaderName,
+                                         final String pathWithinApplication) {
 
         final String method = request.getMethod();
         final String contentType = request.getContentType();
@@ -54,10 +57,10 @@ public final class RequestActionResolver {
         return new ResolvedAction(resolvedName, vendorSupplied, headerSupplied);
     }
 
-    public String extractVendorAction(final String mediaTypeValue) {
+    public static String extractVendorAction(final String mediaTypeValue) {
         String result = null;
         if (hasText(mediaTypeValue)) {
-            final Matcher matcher = VENDOR_TOKEN_PATTERN.matcher(mediaTypeValue);
+            final Matcher matcher = VND_TOKEN_PATTERN.matcher(mediaTypeValue);
             if (matcher.find()) {
                 final String token = matcher.group(1);
                 result = (token == null) ? result : token.toLowerCase(Locale.ROOT);
@@ -66,7 +69,7 @@ public final class RequestActionResolver {
         return result;
     }
 
-    public String extractFirstVendorFromHeaderList(final String headerValue) {
+    public static String extractFirstVendorFromHeaderList(final String headerValue) {
         String result = null;
         if (hasText(headerValue)) {
             final String[] parts = headerValue.split(",");
@@ -82,7 +85,13 @@ public final class RequestActionResolver {
         return result;
     }
 
-    private boolean hasText(final String text) {
+    private static boolean hasText(final String text) {
         return text != null && !text.isBlank();
+    }
+
+    public record ResolvedAction(String name, boolean vendorSupplied, boolean headerSupplied) {
+        public ResolvedAction {
+            Objects.requireNonNull(name, "name");
+        }
     }
 }

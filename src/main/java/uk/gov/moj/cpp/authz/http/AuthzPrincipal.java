@@ -1,10 +1,9 @@
 package uk.gov.moj.cpp.authz.http;
 
 import java.util.Set;
-import java.util.UUID;
 
-public record AuthPrincipal(
-        UUID userId,
+public record AuthzPrincipal(
+        String userId,
         String firstName,
         String lastName,
         String email,

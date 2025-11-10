@@ -1,18 +1,17 @@
-package uk.gov.moj.cpp.authz.drools.providers;
+package uk.gov.moj.cpp.authz.http.providers;
 
-import lombok.extern.slf4j.Slf4j;
-import uk.gov.moj.cpp.authz.drools.AuthAction;
-import uk.gov.moj.cpp.authz.http.AuthPrincipal;
+import uk.gov.moj.cpp.authz.drools.Action;
+import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
 
 import java.util.Set;
 
-@Slf4j
-public record UserAndGroupProviderImpl(AuthPrincipal principal) implements UserAndGroupProvider {
+public record RequestUserAndGroupProvider(
+        AuthzPrincipal principal) implements UserAndGroupProvider {
 
     @Override
-    public boolean isMemberOfAnyOfTheSuppliedGroups(final AuthAction authAction, final String... groups) {
-        log.info("UserAndGroupProviderImpl checking member groups for action:{}", authAction.getName());
+    public boolean isMemberOfAnyOfTheSuppliedGroups(final Action action, final String... groups) {
         boolean isMember = false;
+
         if (principal != null) {
             final Set<String> userGroups = principal.groups();
 

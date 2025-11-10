@@ -1,80 +1,68 @@
 package uk.gov.moj.cpp.authz.http;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
+
+import java.net.URI;
+import java.time.Duration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthHeaderProperties;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthPathProperties;
-import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.time.Duration;
-import java.util.UUID;
-
-@Slf4j
-@Service
+/**
+ * Minimal identity client that fetches group/permission information for a user.
+ * Avoids concrete HttpHeaders usage by adding headers directly on the RequestEntity builder.
+ */
 public final class IdentityClient {
-    private final HttpAuthPathProperties pathProperties;
-    private final HttpAuthHeaderProperties headerProperties;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IdentityClient.class);
+
+    private final HttpAuthzProperties properties;
     private final RestTemplate restTemplate;
 
-    public IdentityClient(final HttpAuthPathProperties pathProperties, final HttpAuthHeaderProperties headerProperties) {
-        this.pathProperties = pathProperties;
-        this.headerProperties = headerProperties;
+    public IdentityClient(final HttpAuthzProperties properties) {
+        this.properties = properties;
+
         final SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) Duration.ofSeconds(20).toMillis());
         factory.setReadTimeout((int) Duration.ofSeconds(21).toMillis());
+
         this.restTemplate = new RestTemplate(factory);
     }
 
-    /**
-     * PMD LooseCoupling warning on HttpHeaders ... how can we fix this ?
-     * MultiValueMap<String, String> httpHeaders = new HttpHeaders();
-     * RequestEntity.get(url).headers((HttpHeaders) httpHeaders)
-     * ... then get warned to use HttpHeaders to avoid the cast :)
-     */
-    @SuppressWarnings("PMD.LooseCoupling")
-    public IdentityResponse fetchIdentity(final UUID userId) {
-        final String urlPath = pathProperties.getIdentityUrlPath().replace("{userId}", userId.toString());
-        final URI url = constructUrl(pathProperties.getIdentityUrlRoot(), urlPath);
-        final HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Accept", headerProperties.getAcceptHeader());
-        httpHeaders.add(headerProperties.getUserIdHeaderName(), userId.toString());
-        final RequestEntity<Void> request = RequestEntity.get(url).headers(httpHeaders).build();
-        try {
-            final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
-            if (response == null || response.getBody() == null) {
-                log.error("Empty identity response");
-                return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
-            } else {
-                return new IdentityResponse(userId, response.getBody().groups(), response.getBody().permissions());
-            }
-        } catch (Exception e) {
-            log.error("Exception fetching identity ", e);
-            throw e;
-        }
-    }
+    public IdentityResponse fetchIdentity(final String userId) {
+        final String template = properties.getIdentityUrlTemplate();
+        final String url = template.contains("{userId}") ? template.replace("{userId}", userId) : template;
 
-    public URI constructUrl(final String root, final String path) {
+        final RequestEntity<Void> request = RequestEntity
+                .get(URI.create(url))
+                .header("Accept", properties.getAcceptHeader())
+                .header(properties.getUserIdHeader(), userId)
+                .build();
+
         try {
-            final URL rootUrl = new URL(root);
-            final URI uri = new URL(rootUrl, path).toURI();
-            if (uri.getHost().equalsIgnoreCase(rootUrl.getHost())) {
-                return uri;
-            } else {
-                log.error("Invalid url constructed host does not match root host:{}", rootUrl.getHost());
-                throw new RuntimeException("Invalid url host does not match urlRoot");
+            final ResponseEntity<LoggedInUserPermissionsResponse> response =
+                    restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Identity fetch for userId={} returned status={}", userId, response.getStatusCode());
             }
-        } catch (URISyntaxException | MalformedURLException e) {
-            log.error("Invalid url. {}", e.getMessage());
-            throw new RuntimeException("Invalid url");
+
+            final LoggedInUserPermissionsResponse body = response.getBody();
+            if (body == null) {
+                LOGGER.warn("Empty identity response for userId={}", userId);
+                return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
+            }
+            return new IdentityResponse(userId, body.groups(), body.permissions());
+
+        } catch (final Exception ex) {
+            LOGGER.error("Identity fetch failed for userId={} ({}). Returning empty identity.",
+                    userId, ex.getClass().getSimpleName(), ex);
+            return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
         }
     }
 }

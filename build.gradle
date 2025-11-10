@@ -1,17 +1,17 @@
 plugins {
-  id 'java-library'
-  id 'pmd'
-  id 'maven-publish'
-  id 'org.cyclonedx.bom' version '3.0.1'
+    id 'java-library'
+    id 'pmd'
+    id 'maven-publish'
+    id 'org.cyclonedx.bom' version '3.0.1'
 }
 
 group = 'uk.gov.hmcts.cp'
 version = System.getProperty('API_SPEC_VERSION') ?: '0.0.999'
 
 java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(21))
-  }
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 def githubActor = project.findProperty("github.actor") ?: System.getenv("GITHUB_ACTOR")
@@ -23,78 +23,78 @@ def azureADOArtifactActor = System.getenv("AZURE_DEVOPS_ARTIFACT_USERNAME")
 def azureADOArtifactToken = System.getenv("AZURE_DEVOPS_ARTIFACT_TOKEN")
 
 repositories {
-  mavenLocal()
-  mavenCentral()
+    mavenLocal()
+    mavenCentral()
 }
 
 publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
     }
-  }
-  repositories {
-    maven {
-      name = "GitHubPackages"
-      url = uri("https://maven.pkg.github.com/$githubRepo")
-      credentials {
-        username = githubActor
-        password = githubToken
-      }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/$githubRepo")
+            credentials {
+                username = githubActor
+                password = githubToken
+            }
+        }
+        maven {
+            name = "AzureArtifacts"
+            url = uri(azureADOArtifactRepository)
+            credentials {
+                username = azureADOArtifactActor
+                password = azureADOArtifactToken
+            }
+        }
     }
-    maven {
-      name = "AzureArtifacts"
-      url = uri(azureADOArtifactRepository)
-      credentials {
-        username = azureADOArtifactActor
-        password = azureADOArtifactToken
-      }
-    }
-  }
 }
 
 tasks.withType(Test).configureEach {
-  useJUnitPlatform()
+    useJUnitPlatform()
 
-  testLogging {
-    exceptionFormat = 'full'
-  }
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 ext {
-  springBootVersion = "3.5.7"
-  lombokVersion = "1.18.42"
-  jupiterVersion = "6.0.1"
-  droolsVersion = "10.1.0"
-  jacksonVersion = "2.20.1"
+    springBootVersion = "3.5.7"
+    lombokVersion = "1.18.42"
+    jupiterVersion = "6.0.1"
+    droolsVersion = "10.1.0"
+    jacksonVersion = "2.20.1"
 }
 
 dependencies {
-  compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
-  testImplementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 
-  compileOnly "org.projectlombok:lombok:${lombokVersion}"
-  annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-  testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-  testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-  testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
-  testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiterVersion"
-  testImplementation "org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"
-  testImplementation "org.junit.platform:junit-platform-launcher:$jupiterVersion"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiterVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$jupiterVersion"
+    testImplementation "org.junit.platform:junit-platform-launcher:$jupiterVersion"
 
-  // Project specific dependencies
-  api "org.kie:kie-api:$droolsVersion"
-  api "org.drools:drools-core:$droolsVersion"
-  api "org.drools:drools-compiler:$droolsVersion"
-  api "org.drools:drools-mvel:$droolsVersion"
-  api "org.mvel:mvel2:2.5.2.Final"
-  api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-  api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
+    // Project specific dependencies
+    api "org.kie:kie-api:$droolsVersion"
+    api "org.drools:drools-core:$droolsVersion"
+    api "org.drools:drools-compiler:$droolsVersion"
+    api "org.drools:drools-mvel:$droolsVersion"
+    api "org.mvel:mvel2:2.5.2.Final"
+    api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
 }
 
 pmd {
-  ruleSets = []
-  ruleSetFiles = files(".github/pmd-ruleset.xml")
-  ignoreFailures = false
+    ruleSets = []
+    ruleSetFiles = files(".github/pmd-ruleset.xml")
+    ignoreFailures = false
 }
