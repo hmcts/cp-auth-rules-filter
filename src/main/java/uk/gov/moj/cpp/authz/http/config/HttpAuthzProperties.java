@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.authz.http.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.Ordered;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.Ordered;
 
 @ConfigurationProperties(prefix = "authz.http")
 public class HttpAuthzProperties {

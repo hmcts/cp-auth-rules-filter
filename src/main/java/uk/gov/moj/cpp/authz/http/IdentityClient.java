@@ -1,16 +1,17 @@
 package uk.gov.moj.cpp.authz.http;
 
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
+
+import java.net.URI;
+import java.time.Duration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
-import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
-
-import java.net.URI;
-import java.time.Duration;
 
 /**
  * Minimal identity client that fetches group/permission information for a user.

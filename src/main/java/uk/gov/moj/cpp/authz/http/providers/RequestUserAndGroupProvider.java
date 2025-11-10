@@ -5,7 +5,8 @@ import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
 
 import java.util.Set;
 
-public record RequestUserAndGroupProvider(AuthzPrincipal principal) implements UserAndGroupProvider {
+public record RequestUserAndGroupProvider(
+        AuthzPrincipal principal) implements UserAndGroupProvider {
 
     @Override
     public boolean isMemberOfAnyOfTheSuppliedGroups(final Action action, final String... groups) {

@@ -1,10 +1,5 @@
 package uk.gov.moj.cpp.authz.http;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.UrlPathHelper;
 import uk.gov.moj.cpp.authz.drools.Action;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
 import uk.gov.moj.cpp.authz.http.RequestActionResolver.ResolvedAction;
@@ -15,6 +10,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 public final class HttpAuthzFilter implements Filter {
     public static final String OPTIONS = "OPTIONS";
@@ -37,7 +42,6 @@ public final class HttpAuthzFilter implements Filter {
     public void doFilter(final ServletRequest request,
                          final ServletResponse response,
                          final FilterChain filterChain) throws IOException, ServletException {
-
 
 
         final HttpServletRequest httpRequest = (HttpServletRequest) request;

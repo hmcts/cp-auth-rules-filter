@@ -1,5 +1,11 @@
 package uk.gov.moj.cpp.authz.http.config;
 
+import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
+import uk.gov.moj.cpp.authz.http.DefaultIdentityToGroupsMapper;
+import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
+import uk.gov.moj.cpp.authz.http.IdentityClient;
+import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
+
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +16,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
-import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
-import uk.gov.moj.cpp.authz.http.DefaultIdentityToGroupsMapper;
-import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
-import uk.gov.moj.cpp.authz.http.IdentityClient;
-import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
 
 @AutoConfiguration
 @EnableConfigurationProperties(HttpAuthzProperties.class)

@@ -1,5 +1,16 @@
 package uk.gov.moj.cpp.authz.drools;
 
+import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.io.ResourceType;
@@ -11,16 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
-import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public final class DroolsAuthzEngine {
@@ -96,6 +97,7 @@ public final class DroolsAuthzEngine {
             loadRules();
         }
     }
+
     @SuppressWarnings("java:S2095")
     public boolean evaluate(final Object userAndGroupProvider, final Action action) {
         boolean result;

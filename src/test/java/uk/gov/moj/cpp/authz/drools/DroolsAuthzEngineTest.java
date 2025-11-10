@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.authz.drools;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import uk.gov.moj.cpp.authz.http.AuthzPrincipal;
 import uk.gov.moj.cpp.authz.http.config.HttpAuthzProperties;
 import uk.gov.moj.cpp.authz.http.providers.UserAndGroupProvider;
@@ -11,8 +11,9 @@ import uk.gov.moj.cpp.authz.testsupport.TestConstants;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 class DroolsAuthzEngineTest {
 
@@ -46,7 +47,7 @@ class DroolsAuthzEngineTest {
             return false;
         };
         final Action action = new Action(TestConstants.ACTION_HELLO, Map.of());
-        assertTrue(engine.evaluate(provider, action),"Should have access");
+        assertTrue(engine.evaluate(provider, action), "Should have access");
     }
 
     @Test
@@ -60,7 +61,7 @@ class DroolsAuthzEngineTest {
 
         final UserAndGroupProvider provider = (action, groups) -> false;
         final Action action = new Action(TestConstants.ACTION_ECHO, Map.of());
-        assertFalse(engine.evaluate(provider, action),"Access Denied");
+        assertFalse(engine.evaluate(provider, action), "Access Denied");
     }
 
     @Test
