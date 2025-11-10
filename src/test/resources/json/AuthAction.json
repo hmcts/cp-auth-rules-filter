@@ -1,7 +1,0 @@
-{
-    "name": "GET /api/hello",
-    "attributes": {
-        "path": "/api/hello",
-        "method": "GET"
-    }
-}
