@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.authz.drools;
 
 import static java.util.Objects.nonNull;
-import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +26,11 @@ class DroolsAuthzEngineTest {
 
 
     private static final String DROOLS_CLASSPATH_PATTERN = "classpath:/drool-test/**/*.drl";
+    private final List<UserPermission> userPermissionList = List.of(
+            new UserPermission(UUID.randomUUID().toString(), "Restrict Details", "View", "Desc"),
+            new UserPermission(UUID.randomUUID().toString(), "sjp-financial-means", "Delete", "Desc"),
+            new UserPermission(UUID.randomUUID().toString(), "Reorder", "View", "Desc")
+    );
 
     @BeforeAll
     static void prepare() {
@@ -74,13 +79,9 @@ class DroolsAuthzEngineTest {
         properties.setDenyWhenNoRules(true);
         final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
 
+
         final AuthzPrincipal principal =
-                new AuthzPrincipal("u2", "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA),
-                        List.of(
-                                new UserPermission(randomUUID().toString(), "Restrict Details", "View", "Desc"),
-                                new UserPermission(randomUUID().toString(), "sjp-financial-means", "Delete", "Desc"),
-                                new UserPermission(randomUUID().toString(), "Reorder", "View", "Desc")
-                        ));
+                new AuthzPrincipal("u2", "fn", "ln", "u2@example.test", Set.of(TestConstants.GROUP_LA), userPermissionList);
         final UserAndGroupProvider provider = getUserAndGroupProvider(principal);
 
         final Action action = new Action(TestConstants.ACTION_SJP_DELETE_FINANCIAL_MEANS, Map.of());
@@ -114,12 +115,7 @@ class DroolsAuthzEngineTest {
         final DroolsAuthzEngine engine = new DroolsAuthzEngine(properties);
 
         final AuthzPrincipal principal =
-                new AuthzPrincipal("u3", "fn", "ln", "u3@example.test", Set.of(),
-                        List.of(
-                                new UserPermission(randomUUID().toString(), "Restrict Details", "View", "Desc"),
-                                new UserPermission(randomUUID().toString(), "draft-result", "View", "Desc"),
-                                new UserPermission(randomUUID().toString(), "Reorder", "View", "Desc")
-                        ));
+                new AuthzPrincipal("u3", "fn", "ln", "u3@example.test", Set.of(), userPermissionList);
         final UserAndGroupProvider provider = getUserAndGroupProvider(principal);
 
         final Action action = new Action(TestConstants.ACTION_HEARING_GET_DRAFT_RESULT, Map.of());
@@ -151,9 +147,9 @@ class DroolsAuthzEngineTest {
                 return false;
             }
 
-            private UserPermission toUserPermission(final String ep) {
+            private UserPermission toUserPermission(final String permissionStr) {
                 try {
-                    return objectMapper.readValue(ep, UserPermission.class);
+                    return objectMapper.readValue(permissionStr, UserPermission.class);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }

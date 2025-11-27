@@ -16,14 +16,22 @@ import org.junit.jupiter.api.Test;
 
 class RequestUserAndGroupProviderTest {
 
+    private static final String GET_API_HELLO = "GET /api/hello";
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final List<UserPermission> userPermissions = List.of(
+            new UserPermission(randomUUID().toString(), "Restrict Details", "View", "Desc1"),
+            new UserPermission(randomUUID().toString(), "Reorder", "View", "Desc2"),
+            new UserPermission(randomUUID().toString(), "COTR", "courts-access", "Desc3"),
+            new UserPermission(randomUUID().toString(), "CrackedIneffective", "Edit", "Desc4")
+    );
 
     @Test
     void returnsTrueWhenPrincipalHasAnyOfTheGroups() {
         final AuthzPrincipal principal = new AuthzPrincipal(
                 "u1", "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"), List.of());
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal, objectMapper);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action,
                 "Prosecuting Authority Access", "Legal Advisers");
@@ -36,7 +44,7 @@ class RequestUserAndGroupProviderTest {
         final AuthzPrincipal principal = new AuthzPrincipal(
                 "u2", "fn", "ln", "u2@example.test", Set.of("Guests"), List.of());
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal, objectMapper);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action,
                 "Legal Advisers", "Prosecuting Authority Access");
@@ -47,7 +55,7 @@ class RequestUserAndGroupProviderTest {
     @Test
     void returnsFalseWhenPrincipalIsNull() {
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(null, null);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.isMemberOfAnyOfTheSuppliedGroups(action, "Anything");
 
@@ -57,14 +65,9 @@ class RequestUserAndGroupProviderTest {
     @Test
     void returnsTrueWhenPrincipalHasAnyOfThePermissions() {
         final AuthzPrincipal principal = new AuthzPrincipal(
-                "u1", "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"), List.of(
-                new UserPermission(randomUUID().toString(), "Restrict Details", "View", "Desc"),
-                new UserPermission(randomUUID().toString(), "Reorder", "View", "Desc"),
-                new UserPermission(randomUUID().toString(), "COTR", "courts-access", "Desc"),
-                new UserPermission(randomUUID().toString(), "CrackedIneffective", "Edit", "Desc")
-        ));
+                "u11", "fn", "ln", "u11@example.test", Set.of(), userPermissions);
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal, objectMapper);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.hasPermission(action, "{\"object\":\"COTR\",\"action\":\"courts-access\"}", "{\"object\":\"random\",\"action\":\"run\"}");
 
@@ -74,9 +77,9 @@ class RequestUserAndGroupProviderTest {
     @Test
     void returnsFalseWhenPrincipalLacksPermissions() {
         final AuthzPrincipal principal = new AuthzPrincipal(
-                "u1", "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"), List.of());
+                "u12", "fn", "ln", "u12@example.test", Set.of(), List.of());
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal, objectMapper);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.hasPermission(action, "{\"object\":\"COTR\",\"action\":\"courts-access\"}", "{\"object\":\"random\",\"action\":\"run\"}");
 
@@ -86,14 +89,9 @@ class RequestUserAndGroupProviderTest {
     @Test
     void returnsFalseWhenPrincipalHasNoMatchingPermissions() {
         final AuthzPrincipal principal = new AuthzPrincipal(
-                "u1", "fn", "ln", "u1@example.test", Set.of("Legal Advisers", "Other"), List.of(
-                new UserPermission(randomUUID().toString(), "Restrict Details", "View", "Desc"),
-                new UserPermission(randomUUID().toString(), "Reorder", "View", "Desc"),
-                new UserPermission(randomUUID().toString(), "COTR", "courts-access", "Desc"),
-                new UserPermission(randomUUID().toString(), "CrackedIneffective", "Edit", "Desc")
-        ));
+                "u13", "fn", "ln", "u13@example.test", Set.of(), userPermissions);
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(principal, objectMapper);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.hasPermission(action, "{\"object\":\"random1\",\"action\":\"view\"}", "{\"object\":\"random2\",\"action\":\"run\"}");
 
@@ -103,7 +101,7 @@ class RequestUserAndGroupProviderTest {
     @Test
     void hasPermissionReturnsFalseWhenPrincipalIsNull() {
         final RequestUserAndGroupProvider provider = new RequestUserAndGroupProvider(null, objectMapper);
-        final Action action = new Action("GET /api/hello", Map.of());
+        final Action action = new Action(GET_API_HELLO, Map.of());
 
         final boolean result = provider.hasPermission(action, "{\"object\":\"random1\",\"action\":\"view\"}");
 
