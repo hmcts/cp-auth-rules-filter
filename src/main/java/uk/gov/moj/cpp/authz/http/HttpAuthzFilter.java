@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -78,7 +79,7 @@ public final class HttpAuthzFilter implements Filter {
                     final IdentityResponse identityResponse = identityClient.fetchIdentity(userId);
                     final Set<String> groups = identityToGroupsMapper.toGroups(identityResponse);
                     final AuthzPrincipal principal =
-                            new AuthzPrincipal(identityResponse.userId(), null, null, null, groups);
+                            new AuthzPrincipal(identityResponse.userId(), null, null, null, groups, identityResponse.permissions());
                     httpRequest.setAttribute(AuthzPrincipal.class.getName(), principal);
 
                     final Map<String, Object> attributes = new HashMap<>();
@@ -86,8 +87,7 @@ public final class HttpAuthzFilter implements Filter {
                     attributes.put("path", pathWithinApplication);
 
                     final Action action = new Action(resolved.name(), attributes);
-                    final RequestUserAndGroupProvider perRequestProvider =
-                            new RequestUserAndGroupProvider(principal);
+                    final RequestUserAndGroupProvider perRequestProvider = new RequestUserAndGroupProvider(principal, new ObjectMapper());
 
                     final boolean allowed = droolsAuthzEngine.evaluate(perRequestProvider, action);
                     if (allowed) {
