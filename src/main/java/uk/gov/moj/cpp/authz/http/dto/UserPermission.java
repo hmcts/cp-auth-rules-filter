@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.authz.http.dto;
 
-import org.apache.commons.lang3.StringUtils;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.stripEnd;
 
 public record UserPermission(
         String permissionId,
@@ -14,14 +15,14 @@ public record UserPermission(
         final String strObject = this.object();
         final String strAction = this.action();
 
-        if (StringUtils.isNotEmpty(strObject)) {
+        if (isNotEmpty(strObject)) {
             stringBuilder.append(strObject).append('_');
         }
 
-        if (StringUtils.isNotEmpty(strAction)) {
+        if (isNotEmpty(strAction)) {
             stringBuilder.append(strAction).append('_');
         }
 
-        return StringUtils.stripEnd(stringBuilder.toString(), "_");
+        return stripEnd(stringBuilder.toString(), "_");
     }
 }
