@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.authz.drools;
 
 import static java.util.Objects.nonNull;
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,10 +26,12 @@ class DroolsAuthzEngineTest {
 
 
     private static final String DROOLS_CLASSPATH_PATTERN = "classpath:/drool-test/**/*.drl";
+
     private final List<UserPermission> userPermissionList = List.of(
-            new UserPermission(UUID.randomUUID().toString(), "Restrict Details", "View", "Desc"),
-            new UserPermission(UUID.randomUUID().toString(), "sjp-financial-means", "Delete", "Desc"),
-            new UserPermission(UUID.randomUUID().toString(), "Reorder", "View", "Desc")
+            new UserPermission(randomUUID().toString(), "Restrict Details", "View", "Desc1"),
+            new UserPermission(randomUUID().toString(), "sjp-financial-means", "Delete", "Desc2"),
+            new UserPermission(randomUUID().toString(), "draft-result", "View", "Desc3"),
+            new UserPermission(randomUUID().toString(), "Reorder", "View", "Desc4")
     );
 
     @BeforeAll
