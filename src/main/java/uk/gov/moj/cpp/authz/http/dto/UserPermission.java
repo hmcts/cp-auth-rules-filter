@@ -17,15 +17,15 @@ public record UserPermission(
         String strDescription = this.description();
 
         if (StringUtils.isNotEmpty(strPermissionId)) {
-            stringBuilder.append(strPermissionId).append("_");
+            stringBuilder.append(strPermissionId).append('_');
         }
 
         if (StringUtils.isNotEmpty(strObject)) {
-            stringBuilder.append(strObject).append("_");
+            stringBuilder.append(strObject).append('_');
         }
 
         if (StringUtils.isNotEmpty(strAction)) {
-            stringBuilder.append(strAction).append("_");
+            stringBuilder.append(strAction).append('_');
         }
 
         if (StringUtils.isNotEmpty(strDescription)) {
