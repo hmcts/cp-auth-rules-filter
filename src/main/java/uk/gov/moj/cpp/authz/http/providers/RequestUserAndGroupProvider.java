@@ -58,10 +58,10 @@ public record RequestUserAndGroupProvider(AuthzPrincipal principal,
 
     private boolean isMemberInPermissionList(final List<UserPermission> permissions, final List<UserPermission> expectedPermissions) {
         if (!expectedPermissions.isEmpty() && !permissions.isEmpty()) {
-            Set<String> expectedPermissionSet = expectedPermissions.stream().map(UserPermission::getKey).collect(toCollection(HashSet::new));
-            Set<String> actualPermissionSet = permissions.stream().map(UserPermission::getKey).collect(toCollection(HashSet::new));
+            final Set<String> expectedPermissionSet = expectedPermissions.stream().map(UserPermission::getKey).collect(toCollection(HashSet::new));
+            final Set<String> actualPermissionSet = permissions.stream().map(UserPermission::getKey).collect(toCollection(HashSet::new));
             return expectedPermissionSet.stream().anyMatch(expectedPermissionKey ->
-                    actualPermissionSet.stream().anyMatch(actualPermissionKey -> actualPermissionKey.contains(expectedPermissionKey))
+                    actualPermissionSet.stream().anyMatch(actualPermissionKey -> actualPermissionKey.equalsIgnoreCase(expectedPermissionKey))
             );
         }
         return false;

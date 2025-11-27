@@ -10,15 +10,9 @@ public record UserPermission(
 ) {
 
     public String getKey() {
-        StringBuilder stringBuilder = new StringBuilder();
-        String strPermissionId = this.permissionId();
-        String strObject = this.object();
-        String strAction = this.action();
-        String strDescription = this.description();
-
-        if (StringUtils.isNotEmpty(strPermissionId)) {
-            stringBuilder.append(strPermissionId).append('_');
-        }
+        final StringBuilder stringBuilder = new StringBuilder();
+        final String strObject = this.object();
+        final String strAction = this.action();
 
         if (StringUtils.isNotEmpty(strObject)) {
             stringBuilder.append(strObject).append('_');
@@ -28,9 +22,6 @@ public record UserPermission(
             stringBuilder.append(strAction).append('_');
         }
 
-        if (StringUtils.isNotEmpty(strDescription)) {
-            stringBuilder.append(strDescription);
-        }
         return StringUtils.stripEnd(stringBuilder.toString(), "_");
     }
 }
