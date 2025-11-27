@@ -31,7 +31,8 @@ rule "Allow sjp.delete-financial-means for LA"
 when
   $o: Outcome()
   $a: Action(name == "sjp.delete-financial-means")
-  eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($a, "Legal Advisers"))
+  eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($a, "Legal Advisers")) and
+  eval(userAndGroupProvider.hasPermission($a, "{\"object\":\"sjp-financial-means\",\"action\":\"Delete\"}"))
 then
   $o.setSuccess(true);
 end
@@ -40,7 +41,8 @@ rule "Allow hearing.get-draft-result for LA"
 when
   $o: Outcome()
   $a: Action(name == "hearing.get-draft-result")
-  eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($a, "Legal Advisers"))
+  eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($a, "Legal Advisers")) or
+  eval(userAndGroupProvider.hasPermission($a, "{\"object\":\"draft-result\",\"action\":\"View\"}"))
 then
   $o.setSuccess(true);
 end

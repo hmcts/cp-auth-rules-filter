@@ -67,6 +67,7 @@ ext {
     jupiterVersion = "6.0.1"
     droolsVersion = "10.1.0"
     jacksonVersion = "2.20.1"
+    apacheCommonsVersion = "3.14.0"
 }
 
 dependencies {
@@ -91,6 +92,7 @@ dependencies {
     api "org.mvel:mvel2:2.5.2.Final"
     api "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
+    api "org.apache.commons:commons-lang3:$apacheCommonsVersion"
 }
 
 pmd {
