@@ -7,6 +7,7 @@ import java.net.URI;
 import java.time.Duration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.owasp.encoder.Encode;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -33,6 +34,7 @@ public final class IdentityClient {
     }
 
     public IdentityResponse fetchIdentity(final String userId) {
+        final String sanitizedUserId = Encode.forJava(userId);
         final String template = properties.getIdentityUrlTemplate();
         final String url = template.contains("{userId}") ? template.replace("{userId}", userId) : template;
 
@@ -46,18 +48,18 @@ public final class IdentityClient {
             final ResponseEntity<LoggedInUserPermissionsResponse> response =
                     restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
 
-            log.debug("Identity fetch for userId={} returned status={}", userId, response.getStatusCode());
+            log.debug("Identity fetch for userId={} returned status={}", sanitizedUserId, response.getStatusCode());
 
             final LoggedInUserPermissionsResponse body = response.getBody();
             if (body == null) {
-                log.warn("Empty identity response for userId={}", userId);
+                log.warn("Empty identity response for userId={}", sanitizedUserId);
                 return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
             }
             return new IdentityResponse(userId, body.groups(), body.permissions());
 
         } catch (final Exception ex) {
             log.error("Identity fetch failed for userId={} ({}). Returning empty identity.",
-                    userId, ex.getClass().getSimpleName(), ex);
+                    sanitizedUserId, ex.getClass().getSimpleName(), ex);
             return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
         }
     }
