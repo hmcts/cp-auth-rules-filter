@@ -11,22 +11,20 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.extern.slf4j.Slf4j;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.utils.KieHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public final class DroolsAuthzEngine {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DroolsAuthzEngine.class);
     private static final Pattern PACKAGE_PATTERN =
             Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*$", Pattern.MULTILINE);
 
@@ -76,20 +74,18 @@ public final class DroolsAuthzEngine {
         final List<RuleAsset> loaded = new ArrayList<>();
         int sequence = 0;
         for (final Resource resource : resources) {
-            String fileName = resource.getFilename();
-            if (fileName == null || fileName.isBlank()) {
-                fileName = "file" + (sequence++) + ".drl";
-            }
+            final String rawFileName = resource.getFilename();
+            final String fileName = (rawFileName != null && !rawFileName.isBlank())
+                    ? rawFileName
+                    : "file" + sequence++ + ".drl";
             final String content = readResourceContent(resource);
             final String sourcePath = resolveSourcePath(content, fileName);
             loaded.add(new RuleAsset(content, sourcePath));
         }
         loaded.sort(Comparator.comparing(asset -> asset.sourcePath));
         this.ruleAssets = loaded;
-        if (LOGGER.isInfoEnabled()) {
-            final List<String> paths = loaded.stream().map(asset -> asset.sourcePath).toList();
-            LOGGER.info("Loaded {} DRL resource(s): {}", loaded.size(), paths);
-        }
+        final List<String> paths = loaded.stream().map(asset -> asset.sourcePath).toList();
+        log.info("Loaded {} DRL resource(s): {}", loaded.size(), paths);
     }
 
     private void ensureRules() throws IOException {
@@ -112,9 +108,7 @@ public final class DroolsAuthzEngine {
                 }
                 final Results verification = kieHelper.verify();
                 if (verification.hasMessages(Message.Level.ERROR)) {
-                    if (LOGGER.isErrorEnabled()) {
-                        LOGGER.error("Drools verification errors: {}", verification.getMessages(Message.Level.ERROR));
-                    }
+                    log.error("Drools verification errors: {}", verification.getMessages(Message.Level.ERROR));
                     result = !properties.isDenyWhenNoRules();
                 } else {
                     try (KieSession kieSession = kieHelper.build().newKieSession()) {
@@ -128,9 +122,7 @@ public final class DroolsAuthzEngine {
                 }
             }
         } catch (final Exception exception) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Drools evaluation failed; denying access", exception);
-            }
+            log.error("Drools evaluation failed; denying access", exception);
             result = false;
         }
         return result;
