@@ -13,9 +13,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @AutoConfiguration
 @EnableConfigurationProperties(HttpAuthzProperties.class)
@@ -70,10 +72,12 @@ public class AuthzAutoConfiguration {
             final HttpAuthzProperties properties,
             final IdentityClient identityClient,
             final IdentityToGroupsMapper identityToGroupsMapper,
-            final DroolsAuthzEngine droolsAuthzEngine) {
+            final DroolsAuthzEngine droolsAuthzEngine,
+            final ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
 
         final HttpAuthzFilter filter =
-                new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine);
+                new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
+                        handlerMappingProvider.getIfAvailable());
         final FilterRegistrationBean<HttpAuthzFilter> registration = new FilterRegistrationBean<>(filter);
         final int order = properties.getFilterOrder() != null
                 ? properties.getFilterOrder()

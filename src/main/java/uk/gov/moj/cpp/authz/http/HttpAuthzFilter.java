@@ -19,24 +19,34 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 public final class HttpAuthzFilter implements Filter {
     public static final String OPTIONS = "OPTIONS";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpAuthzFilter.class);
+
     private final HttpAuthzProperties properties;
     private final IdentityClient identityClient;
     private final IdentityToGroupsMapper identityToGroupsMapper;
     private final DroolsAuthzEngine droolsAuthzEngine;
+    private final RequestMappingHandlerMapping handlerMapping;
 
     public HttpAuthzFilter(final HttpAuthzProperties properties,
                            final IdentityClient identityClient,
                            final IdentityToGroupsMapper identityToGroupsMapper,
-                           final DroolsAuthzEngine droolsAuthzEngine) {
+                           final DroolsAuthzEngine droolsAuthzEngine,
+                           final RequestMappingHandlerMapping handlerMapping) {
         this.properties = properties;
         this.identityClient = identityClient;
         this.identityToGroupsMapper = identityToGroupsMapper;
         this.droolsAuthzEngine = droolsAuthzEngine;
+        this.handlerMapping = handlerMapping;
     }
 
     @Override
@@ -76,6 +86,8 @@ public final class HttpAuthzFilter implements Filter {
                     httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,
                             "Missing header: " + properties.getActionHeader());
                 } else {
+                    final ResolvedAction effectiveAction = springTemplatedUrlFallback(httpRequest, pathWithinApplication, resolved);
+
                     final IdentityResponse identityResponse = identityClient.fetchIdentity(userId);
                     final Set<String> groups = identityToGroupsMapper.toGroups(identityResponse);
                     final AuthzPrincipal principal =
@@ -86,7 +98,7 @@ public final class HttpAuthzFilter implements Filter {
                     attributes.put("method", httpRequest.getMethod());
                     attributes.put("path", pathWithinApplication);
 
-                    final Action action = new Action(resolved.name(), attributes);
+                    final Action action = new Action(effectiveAction.name(), attributes);
                     final RequestUserAndGroupProvider perRequestProvider = new RequestUserAndGroupProvider(principal, new ObjectMapper());
 
                     final boolean allowed = droolsAuthzEngine.evaluate(perRequestProvider, action);
@@ -105,6 +117,39 @@ public final class HttpAuthzFilter implements Filter {
 
         if (invokeChain) {
             filterChain.doFilter(request, response);
+        }
+    }
+
+    private ResolvedAction springTemplatedUrlFallback(final HttpServletRequest httpRequest,
+                                            final String pathWithinApplication,
+                                            final ResolvedAction resolved) {
+        if (resolved.vendorSupplied() || resolved.headerSupplied() || handlerMapping == null) {
+            return resolved;
+        }
+
+        final String matchedPattern = resolveMatchedPattern(httpRequest);
+        if (matchedPattern == null || matchedPattern.equals(pathWithinApplication)) {
+            return resolved;
+        }
+
+        final String templatedName = httpRequest.getMethod() + " " + matchedPattern;
+        return new ResolvedAction(templatedName, false, false);
+    }
+
+    private String resolveMatchedPattern(final HttpServletRequest httpRequest) {
+        try {
+            final HandlerExecutionChain chain = handlerMapping.getHandler(httpRequest);
+            if (chain == null) {
+                LOGGER.warn("No Spring MVC handler matched {} {} - authz rules will see the raw path",
+                        httpRequest.getMethod(), httpRequest.getRequestURI());
+                return null;
+            }
+            final Object pattern = httpRequest.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+            return pattern instanceof String ? (String) pattern : pattern == null ? null : pattern.toString();
+        } catch (final Exception ex) {
+            LOGGER.warn("Failed to resolve matched route template for {} {} - falling back to raw path: {}",
+                    httpRequest.getMethod(), httpRequest.getRequestURI(), ex.toString());
+            return null;
         }
     }
 }
