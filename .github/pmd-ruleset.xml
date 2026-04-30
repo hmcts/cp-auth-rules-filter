@@ -19,7 +19,6 @@
         <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
         <exclude name="UnitTestContainsTooManyAsserts"/>
         <exclude name="PreserveStackTrace"/>
-        <exclude name="AvoidCatchingGenericException"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
         <exclude name="AtLeastOneConstructor"/>
@@ -34,6 +33,7 @@
     <rule ref="category/java/errorprone.xml">
         <exclude name="InvalidLogMessageFormat"/>
         <exclude name="TestClassWithoutTestCases"/>
+        <exclude name="AvoidCatchingGenericException"/>
     </rule>
     <rule ref="category/java/performance.xml"/>
     <rule ref="category/java/security.xml"/>
