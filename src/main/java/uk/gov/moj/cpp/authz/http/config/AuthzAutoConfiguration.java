@@ -5,6 +5,7 @@ import uk.gov.moj.cpp.authz.http.DefaultIdentityToGroupsMapper;
 import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
 import uk.gov.moj.cpp.authz.http.IdentityClient;
 import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
+import uk.gov.moj.cpp.authz.http.SpringTemplatedUrlFallback;
 
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -68,16 +69,23 @@ public class AuthzAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public SpringTemplatedUrlFallback springTemplatedUrlFallback(
+            final ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
+        return new SpringTemplatedUrlFallback(handlerMappingProvider.getIfAvailable());
+    }
+
+    @Bean
     public FilterRegistrationBean<HttpAuthzFilter> httpAuthzFilterRegistration(
             final HttpAuthzProperties properties,
             final IdentityClient identityClient,
             final IdentityToGroupsMapper identityToGroupsMapper,
             final DroolsAuthzEngine droolsAuthzEngine,
-            final ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
+            final SpringTemplatedUrlFallback springTemplatedUrlFallback) {
 
         final HttpAuthzFilter filter =
                 new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
-                        handlerMappingProvider.getIfAvailable());
+                        springTemplatedUrlFallback);
         final FilterRegistrationBean<HttpAuthzFilter> registration = new FilterRegistrationBean<>(filter);
         final int order = properties.getFilterOrder() != null
                 ? properties.getFilterOrder()
