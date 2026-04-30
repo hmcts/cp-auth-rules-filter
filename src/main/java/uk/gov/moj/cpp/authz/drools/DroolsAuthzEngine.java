@@ -96,7 +96,6 @@ public final class DroolsAuthzEngine {
         }
     }
 
-    @SuppressWarnings("java:S2095")
     public boolean evaluate(final Object userAndGroupProvider, final Action action) {
         boolean result;
         try {
