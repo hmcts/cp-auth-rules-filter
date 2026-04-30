@@ -75,9 +75,11 @@ public final class DroolsAuthzEngine {
         int sequence = 0;
         for (final Resource resource : resources) {
             final String rawFileName = resource.getFilename();
-            final String fileName = (rawFileName != null && !rawFileName.isBlank())
-                    ? rawFileName
-                    : "file" + sequence++ + ".drl";
+            final boolean hasFileName = rawFileName != null && !rawFileName.isBlank();
+            final String fileName = hasFileName ? rawFileName : "file" + sequence + ".drl";
+            if (!hasFileName) {
+                sequence++;
+            }
             final String content = readResourceContent(resource);
             final String sourcePath = resolveSourcePath(content, fileName);
             loaded.add(new RuleAsset(content, sourcePath));
