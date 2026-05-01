@@ -98,6 +98,7 @@ dependencies {
 }
 
 pmd {
+    toolVersion = "7.7.0"
     ruleSets = []
     ruleSetFiles = files(".github/pmd-ruleset.xml")
     ignoreFailures = false
