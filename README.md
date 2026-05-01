@@ -103,3 +103,85 @@ We create a new UserAndGroupsProvider from the user collected information
 We pass the AuthAction and the UserAndGroupsProvider to drools evaluate.
 The response from the drools evaluate is boolean indicating authorisation to perform the activity.
 
+## Action name resolution
+
+The filter computes an "action name" for every authorised request and
+passes it to drools as `Action.name`. Drools rules key on this string.
+
+### Resolution priority
+
+The filter walks four steps and stops at the first one that yields a name:
+
+1. **Vendor media type from `Content-Type`** — e.g.
+   `application/vnd.sjp.delete-financial-means+json` → `sjp.delete-financial-means`.
+2. **Vendor media type from `Accept`** — first vendor match, left-to-right.
+3. **Explicit action header** (default header name `CPP-ACTION`) — whatever
+   string the client supplies, used verbatim. Recommended for plain
+   `application/json` endpoints when you control the callers.
+4. **Computed `<METHOD> <PATH>`** — used when none of the above apply.
+
+`actionRequired=false` (the default) lets requests fall through to step 4.
+Set `actionRequired=true` to reject any request that misses both a vendor
+media type and the `CPP-ACTION` header with HTTP 400.
+
+### Step 4: computed action names
+
+The path component of step 4 is **the matched Spring MVC route template**
+when one is available, otherwise the raw request URI.
+
+| Incoming request                          | Resolved `Action.name`                  | Notes                                    |
+|-------------------------------------------|-----------------------------------------|------------------------------------------|
+| `GET /api/health`                         | `GET /api/health`                       | Literal route, no placeholders           |
+| `POST /api/path1/path2`                   | `POST /api/path1/path2`                 | Multi-segment literal route              |
+| `POST /api/orders/123`                    | `POST /api/orders/{id}`                 | Templated via `RequestMappingHandlerMapping` |
+| `PUT /api/users/u1/orders/o9`             | `PUT /api/users/{userId}/orders/{orderId}` | Multiple placeholders                  |
+| `POST /api/path/cat-7/item-42`            | `POST /api/path/{categoryId}/{itemId}`  | Adjacent placeholders                    |
+| `GET /static/foo.css` (no controller)     | `GET /static/foo.css` + `WARN` log      | Falls back to raw URI                    |
+
+### Authoring drools rules against step 4 names
+
+Three idioms are available — pick whichever matches the route shape best:
+
+```drl
+// 1. Static / literal paths — always supported, simple equality.
+$a: Action(name == "GET /api/health")
+
+// 2. Regex matching against the raw URI — always supported, useful when
+//    you do not want to depend on Spring's route templates (or for paths
+//    served outside RequestMappingHandlerMapping).
+$a: Action(name matches "POST /api/orders/[^/]+")
+
+// 3. Spring-style placeholders — added by this change. Lets you copy the
+//    @RequestMapping pattern straight into the rule and use plain equality.
+$a: Action(name == "POST /api/orders/{id}")
+```
+
+Idioms 1 and 2 worked in earlier versions of this filter and continue to
+work unchanged. Idiom 3 is what the templated step-4 fallback enables: a
+request to `POST /api/orders/123` now produces the rule key
+`POST /api/orders/{id}` (the matched route template), so a simple equality
+check fires regardless of the concrete id.
+
+### What this change did and did not change
+
+- **Did not change:** vendor media types, `CPP-ACTION`, `actionRequired`
+  semantics, the `path` and `method` attributes on the drools `Action`
+  (still the raw URI and request method respectively), the rule file
+  format, or any configuration property.
+- **Did change:** when step 4 is reached, the path component is now the
+  Spring-matched route template (`/api/orders/{id}`) instead of the raw
+  URI (`/api/orders/123`). When no controller matches the request, the
+  filter logs a `WARN` and falls back to the raw URI — preserving the
+  pre-change shape for unmapped paths.
+
+### Implementation note: prior art
+
+The mechanism — having a servlet filter consult Spring MVC's
+`RequestMappingHandlerMapping` to obtain the matched route template — is
+the same technique Spring Security itself uses to support `{id}`-style
+URL matchers (`MvcRequestMatcher`, since Spring Security 5.4 / Nov 2020;
+`PathPatternRequestMatcher` in Spring Security 6). Our usage is strictly
+narrower: we only *read* the matched pattern Spring sets on the request,
+we don't *evaluate* a pattern against the request.
+
+

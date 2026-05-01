@@ -18,6 +18,7 @@ import java.util.Set;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @ExtendWith(MockitoExtension.class)
 class HttpAuthzFilterTest {
@@ -39,10 +43,10 @@ class HttpAuthzFilterTest {
     private static final String PATH_EXCLUDED = "/usersgroups-query-api/query/api/rest/ping";
     private static final String PATH_EXCLUDED_METRICS = "/metrics/prometheus";
     private static final String USER_123 = "user-123";
-    private static final String USER_ABC = "user-abc";
     private static final String ACTION_GET_HELLO = "GET /api/hello";
-    private static final String ACTION_POST_ECHO = "POST /api/echo";
     private static final String GROUP_LEGAL_ADVISERS = "Legal Advisers";
+    private static final String PATH_ATTRIBUTE = "path";
+    private static final String PATH_ORDERS_123 = "/api/orders/123";
 
     @Mock
     private IdentityClient identityClient;
@@ -73,8 +77,10 @@ class HttpAuthzFilterTest {
         httpAuthzProperties.setExcludePathPrefixes(List.of("/usersgroups-query-api/", "/actuator/"));
 
         httpAuthzFilter = new HttpAuthzFilter(
-                httpAuthzProperties, identityClient, identityToGroupsMapper, droolsAuthzEngine);
+                httpAuthzProperties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
+                new SpringTemplatedUrlFallback(null));
     }
+
 
     @Test
     void forwardsRequestUnchangedWhenPathIsExcluded() throws Exception {
@@ -209,14 +215,14 @@ class HttpAuthzFilterTest {
 
         httpAuthzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(PATH_HELLO, captor.getValue().attributes().get("path"), "Path attribute should be /api/hello");
+        assertEquals(PATH_HELLO, captor.getValue().attributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/hello");
     }
 
     @Test
-    void computesActionName() throws IOException, ServletException {
+    void computesTemplatedActionNameAndKeepsRawPathAttribute() throws Exception {
         httpAuthzProperties.setActionRequired(false);
 
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ECHO);
+        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
         req.addHeader(USER_ID_HEADER, USER_123);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
@@ -226,9 +232,13 @@ class HttpAuthzFilterTest {
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
 
-        httpAuthzFilter.doFilter(req, res, filterChain);
+        filterWithMapping(mappingThatReturnsPattern("/api/orders/{id}")).doFilter(req, res, filterChain);
 
-        assertEquals(ACTION_POST_ECHO, captor.getValue().name(), "Computed action should be method + path");
+        final Action action = captor.getValue();
+        assertEquals("POST /api/orders/{id}", action.name(),
+                "Computed action should use the templated route");
+        assertEquals(PATH_ORDERS_123, action.attributes().get(PATH_ATTRIBUTE),
+                "Path attribute should remain the raw URI for downstream rule access");
     }
 
     @Test
@@ -266,7 +276,7 @@ class HttpAuthzFilterTest {
 
         httpAuthzFilter.doFilter(req, res, filterChain);
 
-        assertEquals(PATH_ECHO, captor.getValue().attributes().get("path"), "Path attribute should be /api/echo");
+        assertEquals(PATH_ECHO, captor.getValue().attributes().get(PATH_ATTRIBUTE), "Path attribute should be /api/echo");
     }
 
     @Test
@@ -327,4 +337,22 @@ class HttpAuthzFilterTest {
         when(identity.userId()).thenReturn(userId);
         return identity;
     }
+
+    private HttpAuthzFilter filterWithMapping(final RequestMappingHandlerMapping mapping) {
+        return new HttpAuthzFilter(
+                httpAuthzProperties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
+                new SpringTemplatedUrlFallback(mapping));
+    }
+
+    private static RequestMappingHandlerMapping mappingThatReturnsPattern(final String pattern) throws Exception {
+        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
+        final HandlerExecutionChain chain = mock(HandlerExecutionChain.class);
+        when(mapping.getHandler(any(HttpServletRequest.class))).thenAnswer(invocation -> {
+            final HttpServletRequest req = invocation.getArgument(0);
+            req.setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
+            return chain;
+        });
+        return mapping;
+    }
+
 }

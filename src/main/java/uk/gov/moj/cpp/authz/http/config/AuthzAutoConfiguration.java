@@ -5,6 +5,7 @@ import uk.gov.moj.cpp.authz.http.DefaultIdentityToGroupsMapper;
 import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
 import uk.gov.moj.cpp.authz.http.IdentityClient;
 import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
+import uk.gov.moj.cpp.authz.http.SpringTemplatedUrlFallback;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 @Slf4j
 @AutoConfiguration
@@ -62,14 +65,23 @@ public class AuthzAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public SpringTemplatedUrlFallback springTemplatedUrlFallback(
+            final ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
+        return new SpringTemplatedUrlFallback(handlerMappingProvider.getIfAvailable());
+    }
+
+    @Bean
     public FilterRegistrationBean<HttpAuthzFilter> httpAuthzFilterRegistration(
             final HttpAuthzProperties properties,
             final IdentityClient identityClient,
             final IdentityToGroupsMapper identityToGroupsMapper,
-            final DroolsAuthzEngine droolsAuthzEngine) {
+            final DroolsAuthzEngine droolsAuthzEngine,
+            final SpringTemplatedUrlFallback springTemplatedUrlFallback) {
 
         final HttpAuthzFilter filter =
-                new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine);
+                new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
+                        springTemplatedUrlFallback);
         final FilterRegistrationBean<HttpAuthzFilter> registration = new FilterRegistrationBean<>(filter);
         final int order = properties.getFilterOrder() != null
                 ? properties.getFilterOrder()

@@ -24,19 +24,23 @@ import org.springframework.web.util.UrlPathHelper;
 
 public final class HttpAuthzFilter implements Filter {
     public static final String OPTIONS = "OPTIONS";
+
     private final HttpAuthzProperties properties;
     private final IdentityClient identityClient;
     private final IdentityToGroupsMapper identityToGroupsMapper;
     private final DroolsAuthzEngine droolsAuthzEngine;
+    private final SpringTemplatedUrlFallback springTemplatedUrlFallback;
 
     public HttpAuthzFilter(final HttpAuthzProperties properties,
                            final IdentityClient identityClient,
                            final IdentityToGroupsMapper identityToGroupsMapper,
-                           final DroolsAuthzEngine droolsAuthzEngine) {
+                           final DroolsAuthzEngine droolsAuthzEngine,
+                           final SpringTemplatedUrlFallback springTemplatedUrlFallback) {
         this.properties = properties;
         this.identityClient = identityClient;
         this.identityToGroupsMapper = identityToGroupsMapper;
         this.droolsAuthzEngine = droolsAuthzEngine;
+        this.springTemplatedUrlFallback = springTemplatedUrlFallback;
     }
 
     @Override
@@ -76,6 +80,9 @@ public final class HttpAuthzFilter implements Filter {
                     httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST,
                             "Missing header: " + properties.getActionHeader());
                 } else {
+                    final ResolvedAction effectiveAction =
+                            springTemplatedUrlFallback.apply(httpRequest, pathWithinApplication, resolved);
+
                     final IdentityResponse identityResponse = identityClient.fetchIdentity(userId);
                     final Set<String> groups = identityToGroupsMapper.toGroups(identityResponse);
                     final AuthzPrincipal principal =
@@ -86,7 +93,7 @@ public final class HttpAuthzFilter implements Filter {
                     attributes.put("method", httpRequest.getMethod());
                     attributes.put("path", pathWithinApplication);
 
-                    final Action action = new Action(resolved.name(), attributes);
+                    final Action action = new Action(effectiveAction.name(), attributes);
                     final RequestUserAndGroupProvider perRequestProvider = new RequestUserAndGroupProvider(principal, new ObjectMapper());
 
                     final boolean allowed = droolsAuthzEngine.evaluate(perRequestProvider, action);
@@ -107,4 +114,5 @@ public final class HttpAuthzFilter implements Filter {
             filterChain.doFilter(request, response);
         }
     }
+
 }
