@@ -1,19 +1,21 @@
 package uk.gov.moj.cpp.authz.http.config;
 
 import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
+import uk.gov.moj.cpp.authz.http.AuthzDecider;
 import uk.gov.moj.cpp.authz.http.DefaultIdentityToGroupsMapper;
 import uk.gov.moj.cpp.authz.http.HttpAuthzFilter;
 import uk.gov.moj.cpp.authz.http.IdentityClient;
 import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
+import uk.gov.moj.cpp.authz.http.PathExclusionChecker;
 import uk.gov.moj.cpp.authz.http.SpringTemplatedUrlFallback;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
@@ -72,16 +74,29 @@ public class AuthzAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
+    public PathExclusionChecker pathExclusionChecker(final HttpAuthzProperties properties) {
+        return new PathExclusionChecker(properties.getExcludePathPrefixes());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuthzDecider authzDecider(final HttpAuthzProperties properties,
+                                     final IdentityClient identityClient,
+                                     final IdentityToGroupsMapper identityToGroupsMapper,
+                                     final DroolsAuthzEngine droolsAuthzEngine,
+                                     final SpringTemplatedUrlFallback springTemplatedUrlFallback) {
+        return new AuthzDecider(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
+                springTemplatedUrlFallback);
+    }
+
+    @Bean
     public FilterRegistrationBean<HttpAuthzFilter> httpAuthzFilterRegistration(
             final HttpAuthzProperties properties,
-            final IdentityClient identityClient,
-            final IdentityToGroupsMapper identityToGroupsMapper,
-            final DroolsAuthzEngine droolsAuthzEngine,
-            final SpringTemplatedUrlFallback springTemplatedUrlFallback) {
+            final PathExclusionChecker pathExclusionChecker,
+            final AuthzDecider authzDecider) {
 
-        final HttpAuthzFilter filter =
-                new HttpAuthzFilter(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
-                        springTemplatedUrlFallback);
+        final HttpAuthzFilter filter = new HttpAuthzFilter(properties, pathExclusionChecker, authzDecider);
         final FilterRegistrationBean<HttpAuthzFilter> registration = new FilterRegistrationBean<>(filter);
         final int order = properties.getFilterOrder() != null
                 ? properties.getFilterOrder()
