@@ -43,9 +43,7 @@ class HttpAuthzFilterTest {
     private static final String PATH_EXCLUDED = "/usersgroups-query-api/query/api/rest/ping";
     private static final String PATH_EXCLUDED_METRICS = "/metrics/prometheus";
     private static final String USER_123 = "user-123";
-    private static final String USER_ABC = "user-abc";
     private static final String ACTION_GET_HELLO = "GET /api/hello";
-    private static final String ACTION_POST_ECHO = "POST /api/echo";
     private static final String GROUP_LEGAL_ADVISERS = "Legal Advisers";
     private static final String PATH_ATTRIBUTE = "path";
     private static final String PATH_ORDERS_123 = "/api/orders/123";
@@ -221,10 +219,10 @@ class HttpAuthzFilterTest {
     }
 
     @Test
-    void computesActionName() throws IOException, ServletException {
+    void computesTemplatedActionNameAndKeepsRawPathAttribute() throws Exception {
         httpAuthzProperties.setActionRequired(false);
 
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ECHO);
+        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
         req.addHeader(USER_ID_HEADER, USER_123);
         final MockHttpServletResponse res = new MockHttpServletResponse();
 
@@ -234,9 +232,13 @@ class HttpAuthzFilterTest {
         final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
         when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
 
-        httpAuthzFilter.doFilter(req, res, filterChain);
+        filterWithMapping(mappingThatReturnsPattern("/api/orders/{id}")).doFilter(req, res, filterChain);
 
-        assertEquals(ACTION_POST_ECHO, captor.getValue().name(), "Computed action should be method + path");
+        final Action action = captor.getValue();
+        assertEquals("POST /api/orders/{id}", action.name(),
+                "Computed action should use the templated route");
+        assertEquals(PATH_ORDERS_123, action.attributes().get(PATH_ATTRIBUTE),
+                "Path attribute should remain the raw URI for downstream rule access");
     }
 
     @Test
@@ -328,27 +330,6 @@ class HttpAuthzFilterTest {
 
         assertEquals("hearing.get-draft-result", captor.getValue().name(),
                 "Vendor token from Accept must be used when Content-Type is absent");
-    }
-
-    @Test
-    void filterUsesTemplatedActionNameAndKeepsRawPathAttribute() throws Exception {
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        final IdentityResponse identityResponse = mockIdentity(USER_ABC);
-        when(identityClient.fetchIdentity(USER_ABC)).thenReturn(identityResponse);
-        when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
-
-        filterWithMapping(mappingThatReturnsPattern("/api/orders/{id}")).doFilter(req, res, filterChain);
-
-        final Action action = captor.getValue();
-        assertEquals("POST /api/orders/{id}", action.name(),
-                "Filter should pass the templated action name to the engine");
-        assertEquals(PATH_ORDERS_123, action.attributes().get(PATH_ATTRIBUTE),
-                "Path attribute should remain the raw URI for downstream rule access");
     }
 
     private static IdentityResponse mockIdentity(final String userId) {

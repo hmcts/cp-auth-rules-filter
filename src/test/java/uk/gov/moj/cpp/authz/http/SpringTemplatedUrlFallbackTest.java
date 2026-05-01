@@ -57,19 +57,6 @@ class SpringTemplatedUrlFallbackTest {
     }
 
     @Test
-    void returnsTemplatedNameWhenHandlerMatchesPattern() throws Exception {
-        final SpringTemplatedUrlFallback fallback =
-                new SpringTemplatedUrlFallback(mappingThatReturnsPattern("/api/orders/{id}"));
-        final ResolvedAction resolved = new ResolvedAction(RAW_ACTION, false, false);
-
-        final ResolvedAction result = fallback.apply(
-                new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123), PATH_ORDERS_123, resolved);
-
-        assertEquals("POST /api/orders/{id}", result.name(),
-                "Action name should use the matched route template");
-    }
-
-    @Test
     void templatesPathWithMultiplePathVariables() throws Exception {
         final String rawPath = "/api/users/u1/orders/o9";
         final SpringTemplatedUrlFallback fallback =
