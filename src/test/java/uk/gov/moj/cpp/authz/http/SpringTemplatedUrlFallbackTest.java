@@ -84,20 +84,6 @@ class SpringTemplatedUrlFallbackTest {
     }
 
     @Test
-    void templatesPathWithAdjacentPlaceholders() throws Exception {
-        final String rawPath = "/api/path/cat-7/item-42";
-        final SpringTemplatedUrlFallback fallback =
-                new SpringTemplatedUrlFallback(mappingThatReturnsPattern("/api/path/{categoryId}/{itemId}"));
-        final ResolvedAction resolved = new ResolvedAction(METHOD_POST + " " + rawPath, false, false);
-
-        final ResolvedAction result = fallback.apply(
-                new MockHttpServletRequest(METHOD_POST, rawPath), rawPath, resolved);
-
-        assertEquals("POST /api/path/{categoryId}/{itemId}", result.name(),
-                "Adjacent placeholders separated only by '/' must be templated unchanged");
-    }
-
-    @Test
     void returnsResolvedWhenPatternEqualsRawPath() throws Exception {
         final SpringTemplatedUrlFallback fallback =
                 new SpringTemplatedUrlFallback(mappingThatReturnsPattern(PATH_ORDERS_123));

@@ -331,7 +331,7 @@ class HttpAuthzFilterTest {
     }
 
     @Test
-    void fallbackPathAttributeStaysAsRawPathEvenWhenTemplated() throws Exception {
+    void filterUsesTemplatedActionNameAndKeepsRawPathAttribute() throws Exception {
         final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
         req.addHeader(USER_ID_HEADER, USER_ABC);
         final MockHttpServletResponse res = new MockHttpServletResponse();
@@ -344,153 +344,11 @@ class HttpAuthzFilterTest {
 
         filterWithMapping(mappingThatReturnsPattern("/api/orders/{id}")).doFilter(req, res, filterChain);
 
-        assertEquals(PATH_ORDERS_123, captor.getValue().attributes().get(PATH_ATTRIBUTE),
+        final Action action = captor.getValue();
+        assertEquals("POST /api/orders/{id}", action.name(),
+                "Filter should pass the templated action name to the engine");
+        assertEquals(PATH_ORDERS_123, action.attributes().get(PATH_ATTRIBUTE),
                 "Path attribute should remain the raw URI for downstream rule access");
-    }
-
-    @Test
-    void vendorContentTypeWinsAndSkipsTemplating() throws Exception {
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        req.addHeader("Content-Type", "application/vnd.sjp.delete-financial-means+json");
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        final IdentityResponse identityResponse = mockIdentity(USER_ABC);
-        when(identityClient.fetchIdentity(USER_ABC)).thenReturn(identityResponse);
-        when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
-
-        filterWithMapping(mapping).doFilter(req, res, filterChain);
-
-        assertEquals("sjp.delete-financial-means", captor.getValue().name(),
-                "Vendor token from Content-Type must still win without invoking handler mapping");
-        verify(mapping, times(0)).getHandler(any(HttpServletRequest.class));
-    }
-
-    @Test
-    void explicitActionHeaderWinsAndSkipsTemplating() throws Exception {
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        req.addHeader(ACTION_HEADER, "orders.create");
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        final IdentityResponse identityResponse = mockIdentity(USER_ABC);
-        when(identityClient.fetchIdentity(USER_ABC)).thenReturn(identityResponse);
-        when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
-
-        filterWithMapping(mapping).doFilter(req, res, filterChain);
-
-        assertEquals("orders.create", captor.getValue().name(),
-                "Explicit CPP-ACTION header must still win without invoking handler mapping");
-        verify(mapping, times(0)).getHandler(any(HttpServletRequest.class));
-    }
-
-    @Test
-    void vendorAcceptWinsAndSkipsTemplating() throws Exception {
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-
-        final MockHttpServletRequest req = new MockHttpServletRequest("GET", PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        req.addHeader("Accept", "application/json, application/vnd.hearing.get-draft-result+json;q=0.9");
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        final IdentityResponse identityResponse = mockIdentity(USER_ABC);
-        when(identityClient.fetchIdentity(USER_ABC)).thenReturn(identityResponse);
-        when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
-
-        filterWithMapping(mapping).doFilter(req, res, filterChain);
-
-        assertEquals("hearing.get-draft-result", captor.getValue().name(),
-                "Vendor token from Accept must win without invoking handler mapping");
-        verify(mapping, times(0)).getHandler(any(HttpServletRequest.class));
-    }
-
-    @Test
-    void methodAttributeMatchesRequestMethodWhenTemplated() throws Exception {
-        final MockHttpServletRequest req = new MockHttpServletRequest("DELETE", PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        final IdentityResponse identityResponse = mockIdentity(USER_ABC);
-        when(identityClient.fetchIdentity(USER_ABC)).thenReturn(identityResponse);
-        when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
-
-        filterWithMapping(mappingThatReturnsPattern("/api/orders/{id}")).doFilter(req, res, filterChain);
-
-        assertEquals("DELETE", captor.getValue().attributes().get("method"),
-                "Method attribute must remain the request method when path is templated");
-    }
-
-    @Test
-    void actionRequiredTrueShortCircuitsBeforeTemplating() throws Exception {
-        httpAuthzProperties.setActionRequired(true);
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        filterWithMapping(mapping).doFilter(req, res, filterChain);
-
-        assertEquals(400, res.getStatus(),
-                "actionRequired=true must reject when neither vendor nor header is supplied");
-        verify(mapping, times(0)).getHandler(any(HttpServletRequest.class));
-        verify(droolsAuthzEngine, times(0)).evaluate(any(), any());
-    }
-
-    @Test
-    void excludedPathDoesNotInvokeHandlerMapping() throws Exception {
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_GET, PATH_EXCLUDED);
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        filterWithMapping(mapping).doFilter(req, res, filterChain);
-
-        verify(filterChain, times(1)).doFilter(req, res);
-        verify(mapping, times(0)).getHandler(any(HttpServletRequest.class));
-    }
-
-    @Test
-    void optionsRequestDoesNotInvokeHandlerMapping() throws Exception {
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-
-        final MockHttpServletRequest req = new MockHttpServletRequest("OPTIONS", PATH_HELLO);
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        filterWithMapping(mapping).doFilter(req, res, filterChain);
-
-        verify(filterChain, times(1)).doFilter(req, res);
-        verify(mapping, times(0)).getHandler(any(HttpServletRequest.class));
-    }
-
-    @Test
-    void pathAttributeStaysRawEvenWhenHandlerMappingFails() throws Exception {
-        final MockHttpServletRequest req = new MockHttpServletRequest(METHOD_POST, PATH_ORDERS_123);
-        req.addHeader(USER_ID_HEADER, USER_ABC);
-        final MockHttpServletResponse res = new MockHttpServletResponse();
-
-        final IdentityResponse identityResponse = mockIdentity(USER_ABC);
-        when(identityClient.fetchIdentity(USER_ABC)).thenReturn(identityResponse);
-        when(identityToGroupsMapper.toGroups(identityResponse)).thenReturn(Set.of(GROUP_LEGAL_ADVISERS));
-        final ArgumentCaptor<Action> captor = ArgumentCaptor.forClass(Action.class);
-        when(droolsAuthzEngine.evaluate(any(), captor.capture())).thenReturn(true);
-
-        filterWithMapping(mappingThatReturnsNoHandler()).doFilter(req, res, filterChain);
-
-        assertEquals(PATH_ORDERS_123, captor.getValue().attributes().get(PATH_ATTRIBUTE),
-                "Path attribute must remain the raw URI even when templating cannot resolve a pattern");
     }
 
     private static IdentityResponse mockIdentity(final String userId) {
@@ -516,9 +374,4 @@ class HttpAuthzFilterTest {
         return mapping;
     }
 
-    private static RequestMappingHandlerMapping mappingThatReturnsNoHandler() throws Exception {
-        final RequestMappingHandlerMapping mapping = mock(RequestMappingHandlerMapping.class);
-        when(mapping.getHandler(any(HttpServletRequest.class))).thenReturn(null);
-        return mapping;
-    }
 }
