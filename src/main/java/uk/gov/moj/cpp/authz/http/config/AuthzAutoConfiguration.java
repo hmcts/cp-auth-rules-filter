@@ -8,8 +8,7 @@ import uk.gov.moj.cpp.authz.http.IdentityToGroupsMapper;
 import uk.gov.moj.cpp.authz.http.SpringTemplatedUrlFallback;
 
 import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,12 +19,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+@Slf4j
 @AutoConfiguration
 @EnableConfigurationProperties(HttpAuthzProperties.class)
 @ConditionalOnProperty(prefix = "authz.http", name = "enabled", havingValue = "true")
 public class AuthzAutoConfiguration {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthzAutoConfiguration.class);
 
     private final HttpAuthzProperties properties;
 
@@ -35,19 +33,17 @@ public class AuthzAutoConfiguration {
 
     @PostConstruct
     private void onStart() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                    "CPP HTTP Authz starter ACTIVE -> identityUrlTemplate='{}', accept='{}', userIdHeader='{}', actionHeader='{}', drools='{}', reloadOnEachRequest={}, denyWhenNoRules={}, filterOrder={}",
-                    properties.getIdentityUrlTemplate(),
-                    properties.getAcceptHeader(),
-                    properties.getUserIdHeader(),
-                    properties.getActionHeader(),
-                    properties.getDroolsClasspathPattern(),
-                    properties.isReloadOnEachRequest(),
-                    properties.isDenyWhenNoRules(),
-                    properties.getFilterOrder()
-            );
-        }
+        log.info(
+                "CPP HTTP Authz starter ACTIVE -> identityUrlTemplate='{}', accept='{}', userIdHeader='{}', actionHeader='{}', drools='{}', reloadOnEachRequest={}, denyWhenNoRules={}, filterOrder={}",
+                properties.getIdentityUrlTemplate(),
+                properties.getAcceptHeader(),
+                properties.getUserIdHeader(),
+                properties.getActionHeader(),
+                properties.getDroolsClasspathPattern(),
+                properties.isReloadOnEachRequest(),
+                properties.isDenyWhenNoRules(),
+                properties.getFilterOrder()
+        );
     }
 
     @Bean

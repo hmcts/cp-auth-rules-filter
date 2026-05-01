@@ -184,8 +184,4 @@ URL matchers (`MvcRequestMatcher`, since Spring Security 5.4 / Nov 2020;
 narrower: we only *read* the matched pattern Spring sets on the request,
 we don't *evaluate* a pattern against the request.
 
-Full architectural justification, references to Spring documentation,
-public-API surface, side-effect analysis, defensive failure modes, and
-test coverage are documented in
-[docs/specs/2026-04-25-templated-fallback-action-design.md](docs/specs/2026-04-25-templated-fallback-action-design.md).
 
