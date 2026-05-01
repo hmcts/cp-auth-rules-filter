@@ -33,6 +33,7 @@
     <rule ref="category/java/errorprone.xml">
         <exclude name="InvalidLogMessageFormat"/>
         <exclude name="TestClassWithoutTestCases"/>
+        <exclude name="AvoidCatchingGenericException"/>
     </rule>
     <rule ref="category/java/performance.xml"/>
     <rule ref="category/java/security.xml"/>

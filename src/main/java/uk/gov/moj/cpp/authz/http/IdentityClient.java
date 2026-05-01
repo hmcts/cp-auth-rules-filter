@@ -6,8 +6,8 @@ import uk.gov.moj.cpp.authz.http.dto.LoggedInUserPermissionsResponse;
 import java.net.URI;
 import java.time.Duration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.owasp.encoder.Encode;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -17,9 +17,8 @@ import org.springframework.web.client.RestTemplate;
  * Minimal identity client that fetches group/permission information for a user.
  * Avoids concrete HttpHeaders usage by adding headers directly on the RequestEntity builder.
  */
+@Slf4j
 public final class IdentityClient {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(IdentityClient.class);
 
     private final HttpAuthzProperties properties;
     private final RestTemplate restTemplate;
@@ -35,34 +34,27 @@ public final class IdentityClient {
     }
 
     public IdentityResponse fetchIdentity(final String userId) {
+        final String sanitizedUserId = Encode.forJava(userId);
         final String template = properties.getIdentityUrlTemplate();
-        final String url = template.contains("{userId}") ? template.replace("{userId}", userId) : template;
-
+        final String url = template.contains("{userId}") ? template.replace("{userId}", sanitizedUserId) : template;
         final RequestEntity<Void> request = RequestEntity
                 .get(URI.create(url))
                 .header("Accept", properties.getAcceptHeader())
-                .header(properties.getUserIdHeader(), userId)
+                .header(properties.getUserIdHeader(), sanitizedUserId)
                 .build();
 
         try {
-            final ResponseEntity<LoggedInUserPermissionsResponse> response =
-                    restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Identity fetch for userId={} returned status={}", userId, response.getStatusCode());
-            }
-
+            final ResponseEntity<LoggedInUserPermissionsResponse> response = restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
+            log.info("Identity fetch for userId={} returned status={}", sanitizedUserId, response.getStatusCode());
             final LoggedInUserPermissionsResponse body = response.getBody();
             if (body == null) {
-                LOGGER.warn("Empty identity response for userId={}", userId);
-                return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
+                log.warn("Empty identity response for userId={}", sanitizedUserId);
+                return new IdentityResponse(sanitizedUserId, java.util.List.of(), java.util.List.of());
             }
-            return new IdentityResponse(userId, body.groups(), body.permissions());
-
+            return new IdentityResponse(sanitizedUserId, body.groups(), body.permissions());
         } catch (final Exception ex) {
-            LOGGER.error("Identity fetch failed for userId={} ({}). Returning empty identity.",
-                    userId, ex.getClass().getSimpleName(), ex);
-            return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
+            log.error("Identity fetch failed for userId={} ({}). Returning empty identity.", sanitizedUserId, ex.getClass().getSimpleName(), ex);
+            return new IdentityResponse(sanitizedUserId, java.util.List.of(), java.util.List.of());
         }
     }
 }
