@@ -34,10 +34,8 @@ public final class IdentityClient {
     }
 
     public IdentityResponse fetchIdentity(final String userId) {
-        final String sanitizedUserId = Encode.forJava(userId);
         final String template = properties.getIdentityUrlTemplate();
         final String url = template.contains("{userId}") ? template.replace("{userId}", userId) : template;
-
         final RequestEntity<Void> request = RequestEntity
                 .get(URI.create(url))
                 .header("Accept", properties.getAcceptHeader())
@@ -47,19 +45,17 @@ public final class IdentityClient {
         try {
             final ResponseEntity<LoggedInUserPermissionsResponse> response =
                     restTemplate.exchange(request, LoggedInUserPermissionsResponse.class);
-
-            log.debug("Identity fetch for userId={} returned status={}", sanitizedUserId, response.getStatusCode());
+            log.info("Identity fetch for userId={} returned status={}", Encode.forJava(userId), response.getStatusCode());
 
             final LoggedInUserPermissionsResponse body = response.getBody();
             if (body == null) {
-                log.warn("Empty identity response for userId={}", sanitizedUserId);
+                log.warn("Empty identity response for userId={}", Encode.forJava(userId));
                 return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
             }
             return new IdentityResponse(userId, body.groups(), body.permissions());
 
         } catch (final Exception ex) {
-            log.error("Identity fetch failed for userId={} ({}). Returning empty identity.",
-                    sanitizedUserId, ex.getClass().getSimpleName(), ex);
+            log.error("Identity fetch failed for userId={} ({}). Returning empty identity.", Encode.forJava(userId), ex.getClass().getSimpleName(), ex);
             return new IdentityResponse(userId, java.util.List.of(), java.util.List.of());
         }
     }
