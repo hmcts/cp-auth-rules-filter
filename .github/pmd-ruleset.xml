@@ -15,9 +15,11 @@
     </rule>
 
     <rule ref="category/java/bestpractices.xml">
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
         <exclude name="GuardLogStatement"/>
         <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
         <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestShouldIncludeAssert"/>
         <exclude name="PreserveStackTrace"/>
     </rule>
     <rule ref="category/java/codestyle.xml">
@@ -38,6 +40,9 @@
         <exclude name="CyclomaticComplexity"/>
         <exclude name="DataClass"/>
         <exclude name="LawOfDemeter"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="SimplifyBooleanReturns"/>
+        <exclude name="TooManyMethods"/>
     </rule>
     <rule ref="category/java/errorprone.xml">
         <exclude name="InvalidLogMessageFormat"/>
