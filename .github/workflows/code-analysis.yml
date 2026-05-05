@@ -24,7 +24,7 @@ jobs:
         with:
           rulesets: '.github/pmd-ruleset.xml'
           sourcePath: 'src/main/java'
-          pmdVersion: '7.7.0'
+          pmdVersion: '7.18.0'
 
       - name: Fail build if there are violations
         if: steps.pmd.outputs.violations != 0

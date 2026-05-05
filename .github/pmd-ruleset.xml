@@ -33,7 +33,7 @@
         <exclude name="OnlyOneReturn"/>
     </rule>
     <rule ref="category/java/design.xml">
-        <exclude name="AvoidCatchingGenericException"/>
+        <exclude name="LoosePackageCoupling"/>
         <exclude name="AvoidDeeplyNestedIfStmts"/>
         <exclude name="AvoidThrowingRawExceptionTypes"/>
         <exclude name="CognitiveComplexity"/>
