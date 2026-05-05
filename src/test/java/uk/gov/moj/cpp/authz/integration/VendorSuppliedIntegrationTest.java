@@ -10,23 +10,23 @@ class VendorSuppliedIntegrationTest extends BaseHttpAuthzFilterIntegrationTest {
 
     @Test
     void allowsRequestWhenContentTypeVendorTokenMatchesRule() throws Exception {
-        mockMvc.perform(post("/api/resource")
+        mockMvc.perform(post("/api/echo")
                         .header(USER_ID_HEADER, TEST_USER)
-                        .contentType("application/vnd.sjp.delete-financial-means+json"))
+                        .contentType("application/vnd.hearing.get-draft-result+json"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void allowsRequestWhenAcceptVendorTokenMatchesRule() throws Exception {
-        mockMvc.perform(get("/api/resource")
+        mockMvc.perform(get("/api/hello")
                         .header(USER_ID_HEADER, TEST_USER)
-                        .header("Accept", "application/vnd.sjp.delete-financial-means+json"))
+                        .header("Accept", "application/vnd.hearing.get-draft-result+json"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void deniesRequestWhenVendorTokenHasNoMatchingRule() throws Exception {
-        mockMvc.perform(post("/api/resource")
+        mockMvc.perform(post("/api/echo")
                         .header(USER_ID_HEADER, TEST_USER)
                         .contentType("application/vnd.unknown.action+json"))
                 .andExpect(status().isForbidden());

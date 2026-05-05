@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
         properties = {
             "authz.http.enabled=true",
-            "authz.http.drools-classpath-pattern=classpath:/acl/integration/*.drl",
+            "authz.http.drools-classpath-pattern=classpath:/drool-test/*.drl",
             "authz.http.reload-on-each-request=false",
             "authz.http.deny-when-no-rules=true",
             "authz.http.user-id-header=CJSCPPUID",

@@ -10,13 +10,13 @@ class FilterPreConditionsIntegrationTest extends BaseHttpAuthzFilterIntegrationT
 
     @Test
     void returns401WhenUserIdHeaderIsMissing() throws Exception {
-        mockMvc.perform(get("/api/resource"))
+        mockMvc.perform(get("/api/hello"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void optionsRequestPassesThroughWithoutAuthCheck() throws Exception {
-        mockMvc.perform(options("/api/resource"))
+        mockMvc.perform(options("/api/hello"))
                 .andExpect(status().isOk());
     }
 }
