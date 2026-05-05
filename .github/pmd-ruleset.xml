@@ -51,6 +51,9 @@
         <exclude name="InvalidLogMessageFormat"/>
         <exclude name="TestClassWithoutTestCases"/>
     </rule>
-    <rule ref="category/java/performance.xml"/>
+    <rule ref="category/java/performance.xml">
+        <!-- @Builder.Default requires an explicit initialiser even for boolean false -->
+        <exclude name="RedundantFieldInitializer"/>
+    </rule>
     <rule ref="category/java/security.xml"/>
 </ruleset>
