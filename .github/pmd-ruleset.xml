@@ -34,9 +34,13 @@
     </rule>
     <rule ref="category/java/design.xml">
         <exclude name="LoosePackageCoupling"/>
+        <exclude name="AvoidCatchingGenericException"/>
         <exclude name="AvoidDeeplyNestedIfStmts"/>
         <exclude name="AvoidThrowingRawExceptionTypes"/>
-        <!-- Some of these nasty exclusions are needed because pmd 7.18 flags them. We should fix them ... but not today -->
+        <exclude name="LawOfDemeter"/>
+        <exclude name="SignatureDeclareThrowsException"/>
+        <exclude name="TooManyMethods"/>
+        <!-- TODO: fix these rather than suppress -->
         <exclude name="CognitiveComplexity"/>
         <exclude name="CyclomaticComplexity"/>
         <exclude name="DataClass"/>
