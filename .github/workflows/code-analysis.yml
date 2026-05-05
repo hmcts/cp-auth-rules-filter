@@ -19,19 +19,30 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - uses: pmd/pmd-github-action@v2
-        id: pmd
+      - uses: gradle/actions/setup-gradle@v5
         with:
-          rulesets: '.github/pmd-ruleset.xml'
-          sourcePath: 'src/main/java,src/test/java'
-          pmdVersion: '7.18.0'
-          analyzeModifiedFilesOnly: false
+          gradle-version: current
 
-      - name: Fail build if there are violations
-        if: always()
+      - name: Run PMD
+        run: ./gradlew pmdMain pmdTest --continue || true
+
+      - name: Report PMD violations
         run: |
-          VIOLATIONS="${{ steps.pmd.outputs.violations }}"
-          if [ -n "$VIOLATIONS" ] && [ "$VIOLATIONS" != "0" ]; then
-            echo "PMD found $VIOLATIONS violations"
-            exit 1
-          fi
+          python3 << 'EOF'
+          import xml.etree.ElementTree as ET, glob, sys
+          violations = []
+          for report in glob.glob('build/reports/pmd/*.xml'):
+              tree = ET.parse(report)
+              for file_el in tree.findall('file'):
+                  path = file_el.get('name').split('/src/')[-1]
+                  for v in file_el.findall('violation'):
+                      violations.append(
+                          f"src/{path}:{v.get('beginline')} [{v.get('ruleset')} / {v.get('rule')}] {v.text.strip()}"
+                      )
+          for v in sorted(violations):
+              print(v)
+          if violations:
+              print(f'\nTotal: {len(violations)} PMD violation(s)')
+              sys.exit(1)
+          print('No PMD violations found')
+          EOF
