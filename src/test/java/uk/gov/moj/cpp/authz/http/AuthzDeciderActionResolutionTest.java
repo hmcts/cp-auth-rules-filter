@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.ACTION_HEADER;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.ACTION_HELLO;
+import static uk.gov.moj.cpp.authz.testsupport.TestConstants.USER_ID_HEADER;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.GROUP_LA;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.METHOD_GET;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.METHOD_POST;
@@ -47,15 +48,16 @@ class AuthzDeciderActionResolutionTest {
     @Captor
     private ArgumentCaptor<Action> actionCaptor;
 
-    private HttpAuthzProperties properties;
+    private final HttpAuthzProperties properties = HttpAuthzProperties.builder()
+            .userIdHeader(USER_ID_HEADER)
+            .actionHeader(ACTION_HEADER)
+            .actionRequired(false)
+            .build();
+
     private AuthzDecider decider;
 
     @BeforeEach
     void setUp() {
-        properties = new HttpAuthzProperties();
-        properties.setUserIdHeader("CJSCPPUID");
-        properties.setActionHeader(ACTION_HEADER);
-        properties.setActionRequired(false);
         decider = new AuthzDecider(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
                 new SpringTemplatedUrlFallback(null));
         stubAuthorisedUser();

@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.authz.testsupport.TestConstants.PATH_ATTRIBUTE;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.PATH_ECHO;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.PATH_HELLO;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.USER_123;
+import static uk.gov.moj.cpp.authz.testsupport.TestConstants.USER_ID_HEADER;
 
 import uk.gov.moj.cpp.authz.drools.Action;
 import uk.gov.moj.cpp.authz.drools.DroolsAuthzEngine;
@@ -45,15 +46,16 @@ class AuthzDeciderPrincipalTest {
     @Captor
     private ArgumentCaptor<Action> actionCaptor;
 
-    private HttpAuthzProperties properties;
+    private final HttpAuthzProperties properties = HttpAuthzProperties.builder()
+            .userIdHeader(USER_ID_HEADER)
+            .actionHeader(ACTION_HEADER)
+            .actionRequired(false)
+            .build();
+
     private AuthzDecider decider;
 
     @BeforeEach
     void setUp() {
-        properties = new HttpAuthzProperties();
-        properties.setUserIdHeader("CJSCPPUID");
-        properties.setActionHeader(ACTION_HEADER);
-        properties.setActionRequired(false);
         decider = new AuthzDecider(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
                 new SpringTemplatedUrlFallback(null));
         stubAuthorisedUser();

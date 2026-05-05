@@ -35,18 +35,17 @@ class HttpAuthzFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    private HttpAuthzProperties properties;
-    private PathExclusionChecker exclusionChecker;
+    private final HttpAuthzProperties properties = HttpAuthzProperties.builder()
+            .userIdHeader(USER_ID_HEADER)
+            .build();
+
     private HttpAuthzFilter filter;
     private MockHttpServletRequest req;
     private MockHttpServletResponse res;
 
     @BeforeEach
     void setUp() {
-        properties = new HttpAuthzProperties();
-        properties.setUserIdHeader(USER_ID_HEADER);
-        exclusionChecker = new PathExclusionChecker(List.of("/usersgroups-query-api/"));
-        filter = new HttpAuthzFilter(properties, exclusionChecker, authzDecider);
+        filter = new HttpAuthzFilter(properties, new PathExclusionChecker(List.of("/usersgroups-query-api/")), authzDecider);
         req = new MockHttpServletRequest(METHOD_GET, PATH_HELLO);
         res = new MockHttpServletResponse();
     }

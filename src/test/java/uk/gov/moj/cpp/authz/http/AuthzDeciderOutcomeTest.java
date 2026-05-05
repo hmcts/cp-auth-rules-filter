@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.ACTION_HEADER;
+import static uk.gov.moj.cpp.authz.testsupport.TestConstants.USER_ID_HEADER;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.GROUP_LA;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.METHOD_GET;
 import static uk.gov.moj.cpp.authz.testsupport.TestConstants.PATH_HELLO;
@@ -38,15 +39,22 @@ class AuthzDeciderOutcomeTest {
     @Mock
     private DroolsAuthzEngine droolsAuthzEngine;
 
-    private HttpAuthzProperties properties;
+    private final HttpAuthzProperties properties = HttpAuthzProperties.builder()
+            .userIdHeader(USER_ID_HEADER)
+            .actionHeader(ACTION_HEADER)
+            .actionRequired(false)
+            .build();
+
+    private final HttpAuthzProperties propertiesActionRequired = HttpAuthzProperties.builder()
+            .userIdHeader(USER_ID_HEADER)
+            .actionHeader(ACTION_HEADER)
+            .actionRequired(true)
+            .build();
+
     private AuthzDecider decider;
 
     @BeforeEach
     void setUp() {
-        properties = new HttpAuthzProperties();
-        properties.setUserIdHeader("CJSCPPUID");
-        properties.setActionHeader(ACTION_HEADER);
-        properties.setActionRequired(false);
         decider = new AuthzDecider(properties, identityClient, identityToGroupsMapper, droolsAuthzEngine,
                 new SpringTemplatedUrlFallback(null));
     }
@@ -77,7 +85,8 @@ class AuthzDeciderOutcomeTest {
 
     @Test
     void actionRequiredButNeitherHeaderNorVendorReturnsDeny400() {
-        properties.setActionRequired(true);
+        decider = new AuthzDecider(propertiesActionRequired, identityClient, identityToGroupsMapper,
+                droolsAuthzEngine, new SpringTemplatedUrlFallback(null));
 
         final Decision decision =
                 decider.decide(new MockHttpServletRequest(METHOD_GET, PATH_HELLO), USER_123, PATH_HELLO);
