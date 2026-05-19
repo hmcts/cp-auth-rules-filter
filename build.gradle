@@ -64,7 +64,7 @@ tasks.withType(Test).configureEach {
 ext {
     springBootVersion = "4.0.6"
     lombokVersion = "1.18.46"
-    jupiterVersion = "6.0.3"
+    jupiterVersion = "6.1.0"
     droolsVersion = "10.2.0"
     jacksonVersion = "2.21.3"
     apacheCommonsVersion = "3.20.0"
