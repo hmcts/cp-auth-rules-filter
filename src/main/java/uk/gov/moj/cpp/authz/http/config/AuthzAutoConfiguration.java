@@ -12,6 +12,7 @@ import uk.gov.moj.cpp.authz.http.SpringTemplatedUrlFallback;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,6 +27,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @EnableConfigurationProperties(HttpAuthzProperties.class)
 @ConditionalOnProperty(prefix = "authz.http", name = "enabled", havingValue = "true")
 public class AuthzAutoConfiguration {
+
+    /**
+     * Canonical Spring MVC handler-mapping bean name. Spring does not expose this as a public constant
+     * (it is the {@code @Bean} method name in {@code WebMvcConfigurationSupport}), so we name it here.
+     */
+    static final String MVC_HANDLER_MAPPING_BEAN = "requestMappingHandlerMapping";
 
     private final HttpAuthzProperties properties;
 
@@ -66,11 +73,27 @@ public class AuthzAutoConfiguration {
         return new DroolsAuthzEngine(properties);
     }
 
+    /**
+     * Resolves the canonical Spring MVC {@code requestMappingHandlerMapping} by name via {@link Qualifier}.
+     * This coexists with Spring Boot Actuator's {@code controllerEndpointHandlerMapping} (also a
+     * {@link RequestMappingHandlerMapping}); a plain by-type lookup is ambiguous in that common setup and
+     * previously failed startup. {@link ObjectProvider#getIfAvailable()} keeps it optional —
+     * {@link SpringTemplatedUrlFallback} treats a {@code null} mapping as "templated fallback disabled".
+     */
     @Bean
     @ConditionalOnMissingBean
     public SpringTemplatedUrlFallback springTemplatedUrlFallback(
+            @Qualifier(MVC_HANDLER_MAPPING_BEAN)
             final ObjectProvider<RequestMappingHandlerMapping> handlerMappingProvider) {
-        return new SpringTemplatedUrlFallback(handlerMappingProvider.getIfAvailable());
+        final RequestMappingHandlerMapping handlerMapping = handlerMappingProvider.getIfAvailable();
+        if (handlerMapping == null) {
+            log.warn("No '{}' bean available; templated-URL action fallback is DISABLED. Requests without a "
+                    + "vendor media type or '{}' header will resolve to their raw path, so authz rules keyed on "
+                    + "route templates will not match. This is expected for non-MVC or media-type-only services; "
+                    + "otherwise check the Spring MVC handler mapping is present.",
+                    MVC_HANDLER_MAPPING_BEAN, properties.getActionHeader());
+        }
+        return new SpringTemplatedUrlFallback(handlerMapping);
     }
 
     @Bean
